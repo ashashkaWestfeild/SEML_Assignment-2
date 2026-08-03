@@ -1055,19 +1055,45 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             "response models, tags for the Swagger grouping.",
             "caption",
         ),
+        para("The application: generated Swagger UI", "h3"),
+        para(
+            "FastAPI derives the interactive documentation from the same "
+            "type annotations that enforce validation at runtime, so the page "
+            "below is not a hand-maintained artefact that can go stale — it "
+            "<i>is</i> the contract. The screenshots are of the running "
+            "service at <font face='Courier'>http://127.0.0.1:8077/docs</font>.",
+            "body",
+        ),
+    ]
+    story += figure(
+        "swagger_ui.png",
+        "Figure 7: Swagger UI at <font face='Courier'>/docs</font>. Routes are "
+        "grouped by tag (<i>ops</i>, <i>inference</i>) and all six request/"
+        "response models are published under Schemas.",
+        15.0,
+    )
+    story += figure(
+        "swagger_predict.png",
+        "Figure 8: <font face='Courier'>POST /v1/predict</font> expanded. The "
+        "worked example payload comes from the schema itself, and all four "
+        "documented outcomes are published to the client: 200 scored, 400 "
+        "business-rule rejection, 422 schema validation failure, 503 model "
+        "unavailable.",
+        14.0,
+    )
+    story += [
         para("Verification against a running service", "h3"),
         para(
             "The figures below are the recorded transcript of real HTTP calls "
-            "issued against a live "
-            "<font face='Courier'>uvicorn</font> process on "
-            "<font face='Courier'>127.0.0.1:8077</font> "
+            "issued against the same live "
+            "<font face='Courier'>uvicorn</font> process "
             "(<font face='Courier'>reports/metrics/api_transcript.json</font>).",
             "body",
         ),
     ]
     story += figure(
         "api_happy_path.png",
-        "Figure 7: Health probe and two scored applications. The "
+        "Figure 9: Health probe and two scored applications. The "
         "same schema-valid payload with a 720 credit score and a "
         "540 score with prior defaults yields LOW (p=0.939, "
         "approved) and HIGH (p=0.081, denied) respectively.",
@@ -1075,7 +1101,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
     )
     story += figure(
         "api_error_handling.png",
-        "Figure 8: Differentiated error handling. Out-of-range "
+        "Figure 10: Differentiated error handling. Out-of-range "
         "value → 422 with the offending field named; unknown key "
         "→ 422 <font face='Courier'>extra_forbidden</font>; "
         "schema-valid but over-leveraged → 400 with a business "
@@ -1138,7 +1164,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             align_center=[3],
         ),
         para(
-            "Figure 9: Test inventory. Fixtures build every artefact in "
+            "Figure 11: Test inventory. Fixtures build every artefact in "
             "memory, so the suite runs on a clean checkout with no trained "
             "model on disk.",
             "caption",
@@ -1205,7 +1231,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             ],
             [4.6 * cm, 5.6 * cm, 6.4 * cm],
         ),
-        para("Figure 10: Model-training tests.", "caption"),
+        para("Figure 12: Model-training tests.", "caption"),
         code(
             defn("tests/test_model_training.py", "test_model_can_overfit_a_small_batch")
         ),
@@ -1268,7 +1294,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             [2.6 * cm, 7.4 * cm, 6.6 * cm],
         ),
         para(
-            "Figure 11: Model-inference tests. The column-order test is what "
+            "Figure 13: Model-inference tests. The column-order test is what "
             "proves the <font face='Courier'>FeatureEngineer</font> really "
             "does re-impose the feature contract inside the artifact.",
             "caption",
@@ -1396,11 +1422,11 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             [1.2 * cm, 3.0 * cm, 6.4 * cm, 1.7 * cm, 2.5 * cm, 1.8 * cm],
             align_center=[0, 3, 4, 5],
         ),
-        para("Figure 12: Model-quality metrics against their release gates.", "caption"),
+        para("Figure 14: Model-quality metrics against their release gates.", "caption"),
     ]
     story += figure(
         "model_quality_metrics.png",
-        "Figure 13: ROC, calibration and confusion matrix on the "
+        "Figure 15: ROC, calibration and confusion matrix on the "
         "held-out split. The calibration curve tracking the "
         "diagonal is what makes the LOW/MEDIUM/HIGH tiering "
         "defensible — a 0.70 prediction really does correspond to "
@@ -1437,7 +1463,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             align_center=[1, 2, 3, 4],
         ),
         para(
-            "Figure 14: The winner is selected automatically by "
+            "Figure 16: The winner is selected automatically by "
             "<font face='Courier'>ModelTrainer.compare_algorithms()</font> on "
             "ROC-AUC — the choice is code, not a comment.",
             "caption",
@@ -1495,7 +1521,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             align_center=[0, 3],
         ),
         para(
-            "Figure 15: Data-quality metrics. DQ-1 and DQ-2 gate the training "
+            "Figure 17: Data-quality metrics. DQ-1 and DQ-2 gate the training "
             "run (<font face='Courier'>strict=True</font> aborts the build); "
             "DQ-3 and DQ-4 run against live batches in production.",
             "caption",
@@ -1517,7 +1543,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             align_center=[1, 2, 3, 4],
         ),
         para(
-            "Figure 16: Top five features by PSI "
+            "Figure 18: Top five features by PSI "
             "(<font face='Courier'>reports/metrics/drift_report.csv</font>). "
             "The gap between the third and fourth row is the signal: real "
             "shift is unambiguous.",
@@ -1526,12 +1552,12 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
     ]
     story += figure(
         "drift_psi.png",
-        "Figure 17: PSI per feature against the 0.10/0.25 industry " "thresholds.",
+        "Figure 19: PSI per feature against the 0.10/0.25 industry " "thresholds.",
         14.0,
     )
     story += figure(
         "latency_distribution.png",
-        f"Figure 18: End-to-end scoring latency over "
+        f"Figure 20: End-to-end scoring latency over "
         f"{lat['n_requests']:,} requests through the real serving "
         f"path: mean {lat['mean']:.2f} ms, p95 {lat['p95']:.2f} ms, "
         f"p99 {lat['p99']:.2f} ms — comfortably inside the "
@@ -1592,7 +1618,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             [2.3 * cm, 2.7 * cm, 5.6 * cm, 3.2 * cm, 3.2 * cm],
         ),
         para(
-            "Figure 19: Staged rollout. Shadow answers 'does it behave?'; "
+            "Figure 21: Staged rollout. Shadow answers 'does it behave?'; "
             "canary answers 'does it behave on customers?'; the A/B holdout "
             "answers 'was it actually better?'.",
             "caption",
@@ -1681,7 +1707,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             [4.4 * cm, 4.0 * cm, 8.2 * cm],
         ),
         para(
-            "Figure 20: Layered input-validation controls. "
+            "Figure 22: Layered input-validation controls. "
             "Six integration tests parametrised over injection strings, "
             "oversized batches and extreme numerics assert that each control "
             "holds.",

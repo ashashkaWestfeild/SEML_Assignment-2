@@ -348,6 +348,16 @@ business-rule rejection · **503** model unavailable · **404** unknown route.
     (
         "code",
         """\
+from IPython.display import Image, display
+
+# The generated Swagger UI of the running service, captured from
+# http://127.0.0.1:8077/docs (reports/figures/swagger_ui.png).
+display(Image(str(PROJECT_ROOT / "reports" / "figures" / "swagger_ui.png"), width=900))
+""",
+    ),
+    (
+        "code",
+        """\
 from fastapi.testclient import TestClient
 from loan_risk.api.app import app
 
