@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Test / tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Trained model artifact (12 MB binary).
+# Rebuilt in a few seconds by `python scripts/train_model.py`, so it is not
+# worth versioning; the metrics it produces ARE committed under reports/.
+artifacts/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+Thumbs.db
+.DS_Store

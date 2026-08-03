@@ -1,0 +1,49 @@
+[project]
+name = "loan-risk-service"
+version = "2.0.0"
+description = "Production ML service for consumer-credit risk assessment (Group 84)"
+requires-python = ">=3.10"
+
+# ── black: the single source of truth for formatting ──────────────────
+[tool.black]
+line-length = 90
+target-version = ["py310", "py311", "py312", "py313"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  | \.venv
+  | artifacts
+  | reports
+  | legacy
+)/
+'''
+
+# ── isort: import ordering, configured to agree with black ────────────
+[tool.isort]
+profile = "black"
+line_length = 90
+known_first_party = ["loan_risk"]
+skip = [".venv", "artifacts", "reports", "legacy"]
+combine_as_imports = true
+
+# ── pytest ────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v --strict-markers"
+markers = [
+    "unit: fast, isolated tests of a single function or class",
+    "integration: tests that exercise several components or the HTTP API",
+    "data: data-validation / data-quality contract tests",
+    "ml: machine-learning behavioural tests (training and inference)",
+]
+
+# ── pylint (secondary linter, complements flake8) ──────────────────────
+[tool.pylint.main]
+ignore-paths = ["^legacy/.*$", "^reports/.*$"]
+
+[tool.pylint.format]
+max-line-length = 90
+
+[tool.pylint."messages control"]
+disable = ["import-error", "too-few-public-methods", "too-many-instance-attributes"]

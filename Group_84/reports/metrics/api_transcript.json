@@ -1,0 +1,361 @@
+[
+  {
+    "label": "Health probe",
+    "method": "GET",
+    "path": "/health",
+    "request": null,
+    "status": 200,
+    "response": {
+      "status": "healthy",
+      "model_loaded": true,
+      "model_version": "2.0.0",
+      "environment": "production",
+      "api_version": "2.0.0"
+    }
+  },
+  {
+    "label": "Model metadata",
+    "method": "GET",
+    "path": "/v1/model/metadata",
+    "request": null,
+    "status": 200,
+    "response": {
+      "model_version": "2.0.0",
+      "loaded": true,
+      "n_features": 22,
+      "decision_threshold": 0.5,
+      "training_metrics": {
+        "accuracy": 0.948,
+        "f1": 0.934343,
+        "precision": 0.951768,
+        "recall": 0.917545,
+        "roc_auc": 0.988084,
+        "brier_score": 0.045828,
+        "log_loss": 0.184114,
+        "n_train": 4000,
+        "n_test": 4000
+      }
+    }
+  },
+  {
+    "label": "Low-risk applicant (200)",
+    "method": "POST",
+    "path": "/v1/predict",
+    "request": {
+      "age": 45,
+      "annual_income": 95000,
+      "credit_score": 720,
+      "employment_status": 0,
+      "education_level": 4,
+      "loan_amount": 25000,
+      "loan_duration": 36,
+      "monthly_debt_payments": 400,
+      "credit_card_utilization_rate": 0.25,
+      "debt_to_income_ratio": 0.15,
+      "bankruptcy_history": 0,
+      "loan_purpose": 3,
+      "previous_loan_defaults": 0,
+      "payment_history": 28,
+      "length_of_credit_history": 15,
+      "savings_account_balance": 35000,
+      "checking_account_balance": 8000,
+      "total_liabilities": 30000,
+      "job_tenure": 10,
+      "net_worth": 220000
+    },
+    "status": 200,
+    "response": {
+      "is_approved": true,
+      "probability": 0.939,
+      "risk_tier": "LOW",
+      "net_worth": 220000,
+      "debt_to_income": 0.15,
+      "latency_ms": 8.29,
+      "model_version": "2.0.0"
+    }
+  },
+  {
+    "label": "High-risk applicant (200)",
+    "method": "POST",
+    "path": "/v1/predict",
+    "request": {
+      "age": 45,
+      "annual_income": 95000,
+      "credit_score": 540,
+      "employment_status": 0,
+      "education_level": 4,
+      "loan_amount": 90000,
+      "loan_duration": 36,
+      "monthly_debt_payments": 400,
+      "credit_card_utilization_rate": 0.92,
+      "debt_to_income_ratio": 0.85,
+      "bankruptcy_history": 0,
+      "loan_purpose": 3,
+      "previous_loan_defaults": 1,
+      "payment_history": 28,
+      "length_of_credit_history": 15,
+      "savings_account_balance": 1200,
+      "checking_account_balance": 8000,
+      "total_liabilities": 30000,
+      "job_tenure": 10,
+      "net_worth": 220000
+    },
+    "status": 200,
+    "response": {
+      "is_approved": false,
+      "probability": 0.0805,
+      "risk_tier": "HIGH",
+      "net_worth": 220000,
+      "debt_to_income": 0.85,
+      "latency_ms": 6.05,
+      "model_version": "2.0.0"
+    }
+  },
+  {
+    "label": "Batch of 2 (200)",
+    "method": "POST",
+    "path": "/v1/predict/batch",
+    "request": {
+      "applications": [
+        {
+          "age": 45,
+          "annual_income": 95000,
+          "credit_score": 720,
+          "employment_status": 0,
+          "education_level": 4,
+          "loan_amount": 25000,
+          "loan_duration": 36,
+          "monthly_debt_payments": 400,
+          "credit_card_utilization_rate": 0.25,
+          "debt_to_income_ratio": 0.15,
+          "bankruptcy_history": 0,
+          "loan_purpose": 3,
+          "previous_loan_defaults": 0,
+          "payment_history": 28,
+          "length_of_credit_history": 15,
+          "savings_account_balance": 35000,
+          "checking_account_balance": 8000,
+          "total_liabilities": 30000,
+          "job_tenure": 10,
+          "net_worth": 220000
+        },
+        {
+          "age": 45,
+          "annual_income": 95000,
+          "credit_score": 540,
+          "employment_status": 0,
+          "education_level": 4,
+          "loan_amount": 90000,
+          "loan_duration": 36,
+          "monthly_debt_payments": 400,
+          "credit_card_utilization_rate": 0.92,
+          "debt_to_income_ratio": 0.85,
+          "bankruptcy_history": 0,
+          "loan_purpose": 3,
+          "previous_loan_defaults": 1,
+          "payment_history": 28,
+          "length_of_credit_history": 15,
+          "savings_account_balance": 1200,
+          "checking_account_balance": 8000,
+          "total_liabilities": 30000,
+          "job_tenure": 10,
+          "net_worth": 220000
+        }
+      ]
+    },
+    "status": 200,
+    "response": {
+      "results": [
+        {
+          "is_approved": true,
+          "probability": 0.939,
+          "risk_tier": "LOW",
+          "net_worth": 220000,
+          "debt_to_income": 0.15,
+          "latency_ms": 5.93,
+          "model_version": "2.0.0"
+        },
+        {
+          "is_approved": false,
+          "probability": 0.0805,
+          "risk_tier": "HIGH",
+          "net_worth": 220000,
+          "debt_to_income": 0.85,
+          "latency_ms": 6.09,
+          "model_version": "2.0.0"
+        }
+      ],
+      "count": 2,
+      "approved_count": 1
+    }
+  },
+  {
+    "label": "Schema violation: credit_score=1500 (422)",
+    "method": "POST",
+    "path": "/v1/predict",
+    "request": {
+      "age": 45,
+      "annual_income": 95000,
+      "credit_score": 1500,
+      "employment_status": 0,
+      "education_level": 4,
+      "loan_amount": 25000,
+      "loan_duration": 36,
+      "monthly_debt_payments": 400,
+      "credit_card_utilization_rate": 0.25,
+      "debt_to_income_ratio": 0.15,
+      "bankruptcy_history": 0,
+      "loan_purpose": 3,
+      "previous_loan_defaults": 0,
+      "payment_history": 28,
+      "length_of_credit_history": 15,
+      "savings_account_balance": 35000,
+      "checking_account_balance": 8000,
+      "total_liabilities": 30000,
+      "job_tenure": 10,
+      "net_worth": 220000
+    },
+    "status": 422,
+    "response": {
+      "detail": [
+        {
+          "type": "less_than_equal",
+          "loc": [
+            "body",
+            "credit_score"
+          ],
+          "msg": "Input should be less than or equal to 850",
+          "input": 1500,
+          "ctx": {
+            "le": 850
+          }
+        }
+      ]
+    }
+  },
+  {
+    "label": "Unknown field typo (422)",
+    "method": "POST",
+    "path": "/v1/predict",
+    "request": {
+      "age": 45,
+      "annual_income": 95000,
+      "credit_score": 720,
+      "employment_status": 0,
+      "education_level": 4,
+      "loan_amount": 25000,
+      "loan_duration": 36,
+      "monthly_debt_payments": 400,
+      "credit_card_utilization_rate": 0.25,
+      "debt_to_income_ratio": 0.15,
+      "bankruptcy_history": 0,
+      "loan_purpose": 3,
+      "previous_loan_defaults": 0,
+      "payment_history": 28,
+      "length_of_credit_history": 15,
+      "savings_account_balance": 35000,
+      "checking_account_balance": 8000,
+      "total_liabilities": 30000,
+      "job_tenure": 10,
+      "net_worth": 220000,
+      "credit_scr": 700
+    },
+    "status": 422,
+    "response": {
+      "detail": [
+        {
+          "type": "extra_forbidden",
+          "loc": [
+            "body",
+            "credit_scr"
+          ],
+          "msg": "Extra inputs are not permitted",
+          "input": 700
+        }
+      ]
+    }
+  },
+  {
+    "label": "SQL-injection string (422)",
+    "method": "POST",
+    "path": "/v1/predict",
+    "request": {
+      "age": 45,
+      "annual_income": "'; DROP TABLE loans;--",
+      "credit_score": 720,
+      "employment_status": 0,
+      "education_level": 4,
+      "loan_amount": 25000,
+      "loan_duration": 36,
+      "monthly_debt_payments": 400,
+      "credit_card_utilization_rate": 0.25,
+      "debt_to_income_ratio": 0.15,
+      "bankruptcy_history": 0,
+      "loan_purpose": 3,
+      "previous_loan_defaults": 0,
+      "payment_history": 28,
+      "length_of_credit_history": 15,
+      "savings_account_balance": 35000,
+      "checking_account_balance": 8000,
+      "total_liabilities": 30000,
+      "job_tenure": 10,
+      "net_worth": 220000
+    },
+    "status": 422,
+    "response": {
+      "detail": [
+        {
+          "type": "int_parsing",
+          "loc": [
+            "body",
+            "annual_income"
+          ],
+          "msg": "Input should be a valid integer, unable to parse string as an integer",
+          "input": "'; DROP TABLE loans;--"
+        }
+      ]
+    }
+  },
+  {
+    "label": "Business-rule breach (400)",
+    "method": "POST",
+    "path": "/v1/predict",
+    "request": {
+      "age": 45,
+      "annual_income": 20000,
+      "credit_score": 720,
+      "employment_status": 0,
+      "education_level": 4,
+      "loan_amount": 500000,
+      "loan_duration": 36,
+      "monthly_debt_payments": 400,
+      "credit_card_utilization_rate": 0.25,
+      "debt_to_income_ratio": 0.15,
+      "bankruptcy_history": 0,
+      "loan_purpose": 3,
+      "previous_loan_defaults": 0,
+      "payment_history": 28,
+      "length_of_credit_history": 15,
+      "savings_account_balance": 35000,
+      "checking_account_balance": 8000,
+      "total_liabilities": 30000,
+      "job_tenure": 10,
+      "net_worth": 220000
+    },
+    "status": 400,
+    "response": {
+      "detail": "Requested amount exceeds 5x annual income.",
+      "error_type": "BusinessRuleViolation"
+    }
+  },
+  {
+    "label": "Unknown route (404)",
+    "method": "GET",
+    "path": "/v1/nope",
+    "request": null,
+    "status": 404,
+    "response": {
+      "detail": "Not Found"
+    }
+  }
+]

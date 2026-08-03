@@ -1,0 +1,16 @@
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\scripts\train_model.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\api\app.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\api\schemas.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_integration_api.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\features\engineering.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\logging_utils.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_model_inference.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\data\ingestion.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_model_training.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\data\validation.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\models\predictor.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\monitoring\drift.py
+reformatted C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\models\trainer.py
+
+All done! \u2728 \U0001f370 \u2728
+13 files reformatted, 12 files left unchanged.

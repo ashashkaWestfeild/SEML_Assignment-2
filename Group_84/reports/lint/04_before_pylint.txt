@@ -1,0 +1,30 @@
+************* Module loan_risk.config
+src\loan_risk\config.py:41:4: C0116: Missing function or method docstring (missing-function-docstring)
+src\loan_risk\config.py:115:8: W0621: Redefining name 'settings' from outer scope (line 136) (redefined-outer-name)
+************* Module loan_risk.api.schemas
+src\loan_risk\api\schemas.py:52:0: C0301: Line too long (91/90) (line-too-long)
+************* Module loan_risk.data.ingestion
+src\loan_risk\data\ingestion.py:92:0: C0301: Line too long (92/90) (line-too-long)
+************* Module loan_risk.data.validation
+src\loan_risk\data\validation.py:80:4: C0116: Missing function or method docstring (missing-function-docstring)
+src\loan_risk\data\validation.py:83:4: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module loan_risk.features.engineering
+src\loan_risk\features\engineering.py:41:0: C0301: Line too long (98/90) (line-too-long)
+src\loan_risk\features\engineering.py:72:18: C0103: Argument name "X" doesn't conform to snake_case naming style (invalid-name)
+src\loan_risk\features\engineering.py:72:18: W0613: Unused argument 'X' (unused-argument)
+src\loan_risk\features\engineering.py:72:35: W0613: Unused argument 'y' (unused-argument)
+src\loan_risk\features\engineering.py:76:24: C0103: Argument name "X" doesn't conform to snake_case naming style (invalid-name)
+src\loan_risk\features\engineering.py:123:36: W0613: Unused argument 'input_features' (unused-argument)
+************* Module loan_risk.models.predictor
+src\loan_risk\models\predictor.py:36:4: C0116: Missing function or method docstring (missing-function-docstring)
+src\loan_risk\models\predictor.py:58:4: C0116: Missing function or method docstring (missing-function-docstring)
+src\loan_risk\models\predictor.py:68:8: C0415: Import outside toplevel (joblib) (import-outside-toplevel)
+************* Module loan_risk.models.trainer
+src\loan_risk\models\trainer.py:61:4: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module loan_risk.monitoring.drift
+src\loan_risk\monitoring\drift.py:39:4: C0116: Missing function or method docstring (missing-function-docstring)
+src\loan_risk\monitoring\drift.py:46:4: C0116: Missing function or method docstring (missing-function-docstring)
+
+-----------------------------------
+Your code has been rated at 9.72/10
+

@@ -1,0 +1,87 @@
+{
+  "model_quality": {
+    "accuracy": 0.948,
+    "f1": 0.934343,
+    "precision": 0.951768,
+    "recall": 0.917545,
+    "roc_auc": 0.988084,
+    "brier_score": 0.045828,
+    "log_loss": 0.184114,
+    "n_train": 4000,
+    "n_test": 4000
+  },
+  "data_quality": {
+    "n_rows": 20000,
+    "n_columns": 23,
+    "schema_conformance_rate": 1.0,
+    "missing_value_fraction": 0.0,
+    "worst_column_missing_fraction": 0.0,
+    "worst_column": "Age",
+    "n_violations": 0,
+    "violations": [],
+    "passed": true
+  },
+  "drift_simulation": {
+    "scenario": "recession: credit score -85, DTI x1.6, utilisation x1.5",
+    "n_features_checked": 22,
+    "n_severe": 3,
+    "n_moderate": 0,
+    "top_5": [
+      {
+        "feature": "CreditScore",
+        "psi": 1.7776,
+        "ks_statistic": 0.3669,
+        "ks_p_value": 0.0,
+        "severity": "SEVERE"
+      },
+      {
+        "feature": "DebtToIncomeRatio",
+        "psi": 0.8469,
+        "ks_statistic": 0.4223,
+        "ks_p_value": 0.0,
+        "severity": "SEVERE"
+      },
+      {
+        "feature": "CreditCardUtilizationRate",
+        "psi": 0.4618,
+        "ks_statistic": 0.2738,
+        "ks_p_value": 0.0,
+        "severity": "SEVERE"
+      },
+      {
+        "feature": "NetWorth",
+        "psi": 0.0051,
+        "ks_statistic": 0.0164,
+        "ks_p_value": 0.349087,
+        "severity": "STABLE"
+      },
+      {
+        "feature": "LoanAmount",
+        "psi": 0.005,
+        "ks_statistic": 0.0243,
+        "ks_p_value": 0.044765,
+        "severity": "STABLE"
+      }
+    ]
+  },
+  "latency_ms": {
+    "mean": 10.287,
+    "p50": 9.651,
+    "p95": 17.486,
+    "p99": 20.038,
+    "sla": 150.0,
+    "n_requests": 1000
+  },
+  "code_quality": {
+    "before": {
+      "flake8": 45,
+      "black": 13,
+      "pylint": 9.72
+    },
+    "after": {
+      "flake8": 0,
+      "black": 0,
+      "pylint": 10.0
+    }
+  }
+}

@@ -1,0 +1,589 @@
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\scripts\train_model.py	2026-08-03 16:42:37.811482+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\scripts\train_model.py	2026-08-03 16:46:16.251524+00:00
+@@ -66,17 +66,18 @@
+             "artifact": str(artifact_path),
+         }
+         (metrics_dir / "training_metrics.json").write_text(
+             json.dumps(payload, indent=2), encoding="utf-8"
+         )
+-        logger.info("training_pipeline_completed",
+-                    extra={"artifact": str(artifact_path)})
++        logger.info("training_pipeline_completed", extra={"artifact": str(artifact_path)})
+         return 0
+ 
+     except LoanRiskError as exc:
+-        logger.error("training_pipeline_failed",
+-                     extra={"error_type": type(exc).__name__, "error": str(exc)})
++        logger.error(
++            "training_pipeline_failed",
++            extra={"error_type": type(exc).__name__, "error": str(exc)},
++        )
+         return 1
+ 
+ 
+ if __name__ == "__main__":
+     raise SystemExit(main())
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\scripts\train_model.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\api\app.py	2026-08-03 16:41:15.895870+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\api\app.py	2026-08-03 16:46:16.303071+00:00
+@@ -43,12 +43,13 @@
+ async def lifespan(_: FastAPI):
+     """Load the artifact once at start-up; stay degraded rather than crash."""
+     if registry.load():
+         logger.info("service_started", extra={"model_version": registry.version})
+     else:
+-        logger.warning("service_started_degraded",
+-                       extra={"reason": "model artifact unavailable"})
++        logger.warning(
++            "service_started_degraded", extra={"reason": "model artifact unavailable"}
++        )
+     yield
+     logger.info("service_stopped")
+ 
+ 
+ app = FastAPI(
+@@ -67,23 +68,25 @@
+ async def business_rule_handler(_: Request, exc: BusinessRuleViolation) -> JSONResponse:
+     """Policy rejection is a *client* error -> 400, not 500."""
+     logger.warning("request_rejected_by_business_rule", extra={"detail": str(exc)})
+     return JSONResponse(
+         status_code=status.HTTP_400_BAD_REQUEST,
+-        content=ErrorResponse(detail=str(exc),
+-                              error_type="BusinessRuleViolation").model_dump(),
++        content=ErrorResponse(
++            detail=str(exc), error_type="BusinessRuleViolation"
++        ).model_dump(),
+     )
+ 
+ 
+ @app.exception_handler(ModelNotLoadedError)
+ async def model_missing_handler(_: Request, exc: ModelNotLoadedError) -> JSONResponse:
+     """No artifact -> 503 so load balancers retry elsewhere."""
+     logger.error("request_failed_model_unavailable", extra={"detail": str(exc)})
+     return JSONResponse(
+         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+-        content=ErrorResponse(detail="Model is not available.",
+-                              error_type="ModelNotLoadedError").model_dump(),
++        content=ErrorResponse(
++            detail="Model is not available.", error_type="ModelNotLoadedError"
++        ).model_dump(),
+     )
+ 
+ 
+ # ---------------------------------------------------------------------- routes
+ @app.get("/health", response_model=HealthResponse, tags=["ops"])
+@@ -139,16 +142,13 @@
+     },
+ )
+ def predict_batch(batch: BatchLoanApplications) -> BatchRiskAssessmentResponse:
+     """Score up to 100 applications in a single round trip."""
+     results = [
+-        RiskAssessmentResponse(
+-            **predictor.predict(item.to_model_payload()).as_dict()
+-        )
++        RiskAssessmentResponse(**predictor.predict(item.to_model_payload()).as_dict())
+         for item in batch.applications
+     ]
+     approved = sum(r.is_approved for r in results)
+-    logger.info("batch_scored", extra={"count": len(results),
+-                                       "approved_count": approved})
++    logger.info("batch_scored", extra={"count": len(results), "approved_count": approved})
+     return BatchRiskAssessmentResponse(
+         results=results, count=len(results), approved_count=approved
+     )
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\api\app.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\data\ingestion.py	2026-08-03 16:38:09.027685+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\data\ingestion.py	2026-08-03 16:46:16.326754+00:00
+@@ -87,11 +87,13 @@
+                 different feature space than the one served, which is the
+                 classic training/serving skew defect.
+         """
+         target = self.config.model.target
+         missing_target = target not in frame.columns
+-        missing_features = [c for c in self.config.model.features if c not in frame.columns]
++        missing_features = [
++            c for c in self.config.model.features if c not in frame.columns
++        ]
+ 
+         if missing_target or missing_features:
+             logger.error(
+                 "feature_contract_violation",
+                 extra={
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\data\ingestion.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\api\schemas.py	2026-08-03 16:40:53.001189+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\api\schemas.py	2026-08-03 16:46:16.374961+00:00
+@@ -47,27 +47,33 @@
+         extra="forbid",
+         json_schema_extra={"example": EXAMPLE_APPLICATION},
+     )
+ 
+     age: int = Field(..., ge=18, le=100, description="Applicant age in years")
+-    annual_income: int = Field(..., gt=0, le=10_000_000, description="Gross annual income")
++    annual_income: int = Field(
++        ..., gt=0, le=10_000_000, description="Gross annual income"
++    )
+     credit_score: int = Field(..., ge=300, le=850, description="Bureau score (300-850)")
+     employment_status: int = Field(
+         ..., ge=0, le=2, description="0=Employed, 1=Self-Employed, 2=Unemployed"
+     )
+     education_level: int = Field(
+-        ..., ge=0, le=4,
++        ...,
++        ge=0,
++        le=4,
+         description="0=Associate, 1=Bachelor, 2=Doctorate, 3=High School, 4=Master",
+     )
+     loan_amount: int = Field(..., gt=0, le=10_000_000, description="Principal requested")
+     loan_duration: int = Field(..., ge=12, le=120, description="Term in months")
+     monthly_debt_payments: int = Field(..., ge=0, le=1_000_000)
+     credit_card_utilization_rate: float = Field(..., ge=0.0, le=1.0)
+     debt_to_income_ratio: float = Field(..., ge=0.0, le=10.0)
+     bankruptcy_history: int = Field(..., ge=0, le=1, description="0=No, 1=Yes")
+     loan_purpose: int = Field(
+-        ..., ge=0, le=4,
++        ...,
++        ge=0,
++        le=4,
+         description="0=Auto, 1=Debt Consolidation, 2=Education, 3=Home, 4=Other",
+     )
+     previous_loan_defaults: int = Field(..., ge=0, le=1, description="0=No, 1=Yes")
+     payment_history: int = Field(..., ge=0, le=600, description="Months of clean history")
+     length_of_credit_history: int = Field(..., ge=0, le=90)
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\api\schemas.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\features\engineering.py	2026-08-03 16:39:05.661375+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\features\engineering.py	2026-08-03 16:46:16.379654+00:00
+@@ -30,17 +30,20 @@
+ logger = get_logger(__name__)
+ 
+ FEATURE_ORDER: List[str] = list(settings.model.features)
+ 
+ #: Columns the raw application must supply before derivation.
+-BASE_COLUMNS: List[str] = [c for c in FEATURE_ORDER
+-                           if c not in ("LoanToIncomeRatio", "SavingsToLoanRatio")]
++BASE_COLUMNS: List[str] = [
++    c for c in FEATURE_ORDER if c not in ("LoanToIncomeRatio", "SavingsToLoanRatio")
++]
+ 
+ _EPSILON = 1.0  # +1 smoothing: makes every ratio total -- never a ZeroDivisionError
+ 
+ 
+-def safe_ratio(numerator: pd.Series | float, denominator: pd.Series | float) -> pd.Series | float:
++def safe_ratio(
++    numerator: pd.Series | float, denominator: pd.Series | float
++) -> pd.Series | float:
+     """Divide with +1 smoothing so the denominator can never be zero.
+ 
+     Pure function -- no I/O, no globals -- which is exactly why it can be
+     property-tested in isolation (see ``tests/test_unit_features.py``).
+     """
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\features\engineering.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_integration_api.py	2026-08-03 16:45:11.628573+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_integration_api.py	2026-08-03 16:46:16.386343+00:00
+@@ -40,12 +40,17 @@
+ def test_predict_returns_200_and_a_complete_payload(api_client, valid_application):
+     response = api_client.post("/v1/predict", json=valid_application)
+     assert response.status_code == 200
+     body = response.json()
+     assert set(body) == {
+-        "is_approved", "probability", "risk_tier", "net_worth",
+-        "debt_to_income", "latency_ms", "model_version",
++        "is_approved",
++        "probability",
++        "risk_tier",
++        "net_worth",
++        "debt_to_income",
++        "latency_ms",
++        "model_version",
+     }
+     assert 0.0 <= body["probability"] <= 1.0
+     assert body["risk_tier"] in {"LOW", "MEDIUM", "HIGH"}
+ 
+ 
+@@ -89,12 +94,15 @@
+     assert response.status_code == 422
+ 
+ 
+ def test_business_rule_violation_returns_400(api_client, valid_application):
+     """Over-leveraged but schema-valid -> a *client* error, never a 500."""
+-    over_leveraged = {**valid_application, "annual_income": 20_000,
+-                      "loan_amount": 500_000}
++    over_leveraged = {
++        **valid_application,
++        "annual_income": 20_000,
++        "loan_amount": 500_000,
++    }
+     response = api_client.post("/v1/predict", json=over_leveraged)
+     assert response.status_code == 400
+     assert response.json()["error_type"] == "BusinessRuleViolation"
+ 
+ 
+@@ -103,12 +111,13 @@
+     payload = {"applications": [valid_application] * 101}
+     assert api_client.post("/v1/predict/batch", json=payload).status_code == 422
+ 
+ 
+ def test_empty_batch_returns_422(api_client):
+-    assert api_client.post("/v1/predict/batch",
+-                           json={"applications": []}).status_code == 422
++    assert (
++        api_client.post("/v1/predict/batch", json={"applications": []}).status_code == 422
++    )
+ 
+ 
+ def test_unknown_route_returns_404(api_client):
+     assert api_client.get("/v1/does-not-exist").status_code == 404
+ 
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_integration_api.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_model_inference.py	2026-08-03 16:44:47.587713+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_model_inference.py	2026-08-03 16:46:16.407784+00:00
+@@ -109,13 +109,13 @@
+ 
+ 
+ # ── invariance expectations ──────────────────────────────────────────────
+ def test_prediction_is_invariant_to_dictionary_key_order(predictor):
+     reversed_payload = dict(reversed(list(APPLICATION.items())))
+-    assert predictor.score(
+-        predictor.to_frame(reversed_payload)
+-    ) == pytest.approx(_score(predictor))
++    assert predictor.score(predictor.to_frame(reversed_payload)) == pytest.approx(
++        _score(predictor)
++    )
+ 
+ 
+ def test_prediction_is_invariant_to_repeated_calls(predictor):
+     """Determinism: the same payload must always yield the same score."""
+     scores = {_score(predictor) for _ in range(5)}
+@@ -155,12 +155,11 @@
+     assert predictor.assign_risk_tier(probability, previous_defaults=0) == expected
+ 
+ 
+ def test_business_rule_rejects_over_leveraged_application(predictor):
+     with pytest.raises(BusinessRuleViolation, match="annual income"):
+-        predictor.predict({**APPLICATION, "AnnualIncome": 20_000,
+-                           "LoanAmount": 500_000})
++        predictor.predict({**APPLICATION, "AnnualIncome": 20_000, "LoanAmount": 500_000})
+ 
+ 
+ def test_business_rule_rejects_sub_threshold_income(predictor):
+     with pytest.raises(BusinessRuleViolation, match="below the minimum"):
+         predictor.predict({**APPLICATION, "AnnualIncome": 500, "LoanAmount": 1_000})
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_model_inference.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\logging_utils.py	2026-08-03 16:37:51.065439+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\logging_utils.py	2026-08-03 16:46:16.408495+00:00
+@@ -21,14 +21,33 @@
+ import time
+ from types import TracebackType
+ from typing import Any, Dict, Optional
+ 
+ _RESERVED = {
+-    "args", "asctime", "created", "exc_info", "exc_text", "filename",
+-    "funcName", "levelname", "levelno", "lineno", "module", "msecs", "msg",
+-    "name", "pathname", "process", "processName", "relativeCreated",
+-    "stack_info", "thread", "threadName", "taskName", "message",
++    "args",
++    "asctime",
++    "created",
++    "exc_info",
++    "exc_text",
++    "filename",
++    "funcName",
++    "levelname",
++    "levelno",
++    "lineno",
++    "module",
++    "msecs",
++    "msg",
++    "name",
++    "pathname",
++    "process",
++    "processName",
++    "relativeCreated",
++    "stack_info",
++    "thread",
++    "threadName",
++    "taskName",
++    "message",
+ }
+ 
+ 
+ class JsonFormatter(logging.Formatter):
+     """Render a ``LogRecord`` (plus any ``extra=`` fields) as one JSON line."""
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\logging_utils.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_model_training.py	2026-08-03 16:44:15.466267+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_model_training.py	2026-08-03 16:46:16.413501+00:00
+@@ -55,11 +55,12 @@
+     losses = []
+     for n_estimators in (1, 5, 50):
+         trainer = ModelTrainer(settings)
+         pipeline = trainer.build_pipeline("random_forest")
+         pipeline.set_params(
+-            model__n_estimators=n_estimators, model__max_depth=None,
++            model__n_estimators=n_estimators,
++            model__max_depth=None,
+             model__min_samples_leaf=1,
+         )
+         pipeline.fit(batch_x, batch_y)
+         probabilities = np.clip(pipeline.predict_proba(batch_x)[:, 1], 1e-9, 1 - 1e-9)
+         losses.append(log_loss(batch_y, probabilities))
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\tests\test_model_training.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\data\validation.py	2026-08-03 16:38:37.685025+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\data\validation.py	2026-08-03 16:46:16.434825+00:00
+@@ -100,12 +100,15 @@
+     CRITICAL FUNCTION #2 for the error-handling requirement: soft breaches are
+     logged as WARNING and accumulated; a hard breach (``strict=True``) is logged
+     as ERROR and raises :class:`SchemaValidationError`.
+     """
+ 
+-    def __init__(self, schema: Tuple[ColumnSpec, ...] = LOAN_SCHEMA,
+-                 max_missing_fraction: float = 0.02) -> None:
++    def __init__(
++        self,
++        schema: Tuple[ColumnSpec, ...] = LOAN_SCHEMA,
++        max_missing_fraction: float = 0.02,
++    ) -> None:
+         self.schema = schema
+         self.max_missing_fraction = max_missing_fraction
+ 
+     def validate(self, frame: pd.DataFrame, strict: bool = False) -> DataQualityReport:
+         """Run every contract check and return a :class:`DataQualityReport`."""
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\data\validation.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\models\predictor.py	2026-08-03 16:40:07.290690+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\models\predictor.py	2026-08-03 16:46:16.456132+00:00
+@@ -75,16 +75,20 @@
+             bundle = joblib.load(target)
+             self.pipeline = bundle["pipeline"]
+             self.version = bundle.get("version", "unknown")
+             self.training_metrics = bundle.get("metrics")
+         except (KeyError, EOFError, OSError, ValueError) as exc:
+-            logger.error("model_artifact_load_failed",
+-                         extra={"path": str(target), "error": str(exc)})
++            logger.error(
++                "model_artifact_load_failed",
++                extra={"path": str(target), "error": str(exc)},
++            )
+             return False
+ 
+-        logger.info("model_artifact_loaded",
+-                    extra={"path": str(target), "model_version": self.version})
++        logger.info(
++            "model_artifact_loaded",
++            extra={"path": str(target), "model_version": self.version},
++        )
+         return True
+ 
+ 
+ class RiskPredictor:
+     """Pipe-and-filter scoring path.
+@@ -105,21 +109,26 @@
+         rules = self.config.rules
+         income = payload["AnnualIncome"]
+         amount = payload["LoanAmount"]
+ 
+         if income < rules.min_annual_income:
+-            logger.warning("business_rule_rejected",
+-                           extra={"rule": "min_annual_income", "value": income})
++            logger.warning(
++                "business_rule_rejected",
++                extra={"rule": "min_annual_income", "value": income},
++            )
+             raise BusinessRuleViolation(
+                 f"Annual income {income} is below the minimum assessable "
+                 f"threshold of {rules.min_annual_income}."
+             )
+         if amount > income * rules.max_loan_to_income_multiple:
+             logger.warning(
+                 "business_rule_rejected",
+-                extra={"rule": "max_loan_to_income_multiple",
+-                       "loan_amount": amount, "annual_income": income},
++                extra={
++                    "rule": "max_loan_to_income_multiple",
++                    "loan_amount": amount,
++                    "annual_income": income,
++                },
+             )
+             raise BusinessRuleViolation(
+                 f"Requested amount exceeds "
+                 f"{rules.max_loan_to_income_multiple:.0f}x annual income."
+             )
+@@ -158,12 +167,11 @@
+         with Timer() as timer:
+             validated = self.validate_business_rules(payload)
+             frame = self.to_frame(validated)
+             probability = self.score(frame)
+             approved = probability >= self.config.model.default_threshold
+-            tier = self.assign_risk_tier(probability,
+-                                         validated["PreviousLoanDefaults"])
++            tier = self.assign_risk_tier(probability, validated["PreviousLoanDefaults"])
+ 
+         assessment = RiskAssessment(
+             is_approved=bool(approved),
+             probability=round(probability, 4),
+             risk_tier=tier,
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\models\predictor.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\monitoring\drift.py	2026-08-03 16:40:29.309004+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\monitoring\drift.py	2026-08-03 16:46:16.465271+00:00
+@@ -80,12 +80,16 @@
+ 
+ 
+ class DriftMonitor:
+     """Compare a live batch against the frozen training reference profile."""
+ 
+-    def __init__(self, reference: pd.DataFrame, features: Sequence[str] | None = None,
+-                 psi_threshold: float = PSI_SEVERE) -> None:
++    def __init__(
++        self,
++        reference: pd.DataFrame,
++        features: Sequence[str] | None = None,
++        psi_threshold: float = PSI_SEVERE,
++    ) -> None:
+         if reference.empty:
+             raise ValueError("Reference profile must not be empty.")
+         self.reference = reference
+         self.features = list(features) if features else list(reference.columns)
+         self.psi_threshold = psi_threshold
+@@ -93,12 +97,13 @@
+     def compare(self, current: pd.DataFrame) -> List[DriftResult]:
+         """Return one :class:`DriftResult` per shared numeric feature."""
+         results: List[DriftResult] = []
+         for feature in self.features:
+             if feature not in current.columns:
+-                logger.warning("drift_feature_absent_in_current",
+-                               extra={"feature": feature})
++                logger.warning(
++                    "drift_feature_absent_in_current", extra={"feature": feature}
++                )
+                 continue
+             ref_values = self.reference[feature].dropna().to_numpy(dtype=float)
+             cur_values = current[feature].dropna().to_numpy(dtype=float)
+             if ref_values.size == 0 or cur_values.size == 0:
+                 continue
+@@ -109,21 +114,22 @@
+ 
+         drifted = [r for r in results if r.psi >= self.psi_threshold]
+         if drifted:
+             logger.warning(
+                 "data_drift_detected",
+-                extra={"n_drifted_features": len(drifted),
+-                       "features": [r.feature for r in drifted]},
++                extra={
++                    "n_drifted_features": len(drifted),
++                    "features": [r.feature for r in drifted],
++                },
+             )
+         else:
+-            logger.info("no_significant_drift",
+-                        extra={"n_features_checked": len(results)})
++            logger.info(
++                "no_significant_drift", extra={"n_features_checked": len(results)}
++            )
+         return results
+ 
+     def summary_frame(self, current: pd.DataFrame) -> pd.DataFrame:
+         """Drift results as a dataframe, worst first -- ready for the report."""
+         rows = [r.as_dict() for r in self.compare(current)]
+         return (
+-            pd.DataFrame(rows)
+-            .sort_values("psi", ascending=False)
+-            .reset_index(drop=True)
++            pd.DataFrame(rows).sort_values("psi", ascending=False).reset_index(drop=True)
+         )
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\monitoring\drift.py
+--- C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\models\trainer.py	2026-08-03 16:39:41.254670+00:00
++++ C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\models\trainer.py	2026-08-03 16:46:16.527435+00:00
+@@ -57,12 +57,14 @@
+     log_loss: float
+     n_train: int
+     n_test: int
+ 
+     def as_dict(self) -> Dict[str, float]:
+-        return {k: (round(v, 6) if isinstance(v, float) else v)
+-                for k, v in asdict(self).items()}
++        return {
++            k: (round(v, 6) if isinstance(v, float) else v)
++            for k, v in asdict(self).items()
++        }
+ 
+ 
+ class ModelTrainer:
+     """Train, evaluate, gate and persist the loan-approval classifier.
+ 
+@@ -93,19 +95,24 @@
+             steps = [("features", FeatureEngineer()), ("model", estimator)]
+         elif algorithm == "logistic_regression":
+             steps = [
+                 ("features", FeatureEngineer()),
+                 ("scaler", StandardScaler()),
+-                ("model", LogisticRegression(max_iter=1000,
+-                                             random_state=model_cfg.random_state)),
++                (
++                    "model",
++                    LogisticRegression(
++                        max_iter=1000, random_state=model_cfg.random_state
++                    ),
++                ),
+             ]
+         else:
+             logger.error("unknown_algorithm_requested", extra={"algorithm": algorithm})
+             raise ModelTrainingError(f"Unsupported algorithm '{algorithm}'")
+ 
+-        logger.info("pipeline_built", extra={"algorithm": algorithm,
+-                                             "n_steps": len(steps)})
++        logger.info(
++            "pipeline_built", extra={"algorithm": algorithm, "n_steps": len(steps)}
++        )
+         return Pipeline(steps)
+ 
+     # ------------------------------------------------------------------ train
+     def train(
+         self,
+@@ -122,12 +129,13 @@
+             )
+             raise ModelTrainingError("Feature/label row counts differ.")
+ 
+         n_classes = labels.nunique()
+         if n_classes < 2:
+-            logger.error("degenerate_label_distribution",
+-                         extra={"n_classes": int(n_classes)})
++            logger.error(
++                "degenerate_label_distribution", extra={"n_classes": int(n_classes)}
++            )
+             raise ModelTrainingError(
+                 "Training data contains a single class; cannot fit a classifier."
+             )
+ 
+         stratify = labels if (evaluate and labels.value_counts().min() >= 2) else None
+@@ -202,13 +210,11 @@
+         if metrics.f1 < gates.min_f1:
+             breaches.append(f"f1 {metrics.f1:.4f} < {gates.min_f1}")
+         if metrics.roc_auc < gates.min_roc_auc:
+             breaches.append(f"roc_auc {metrics.roc_auc:.4f} < {gates.min_roc_auc}")
+         if metrics.brier_score > gates.max_brier_score:
+-            breaches.append(
+-                f"brier {metrics.brier_score:.4f} > {gates.max_brier_score}"
+-            )
++            breaches.append(f"brier {metrics.brier_score:.4f} > {gates.max_brier_score}")
+ 
+         if breaches:
+             logger.error("quality_gate_breached", extra={"breaches": breaches})
+             raise ModelTrainingError("Quality gates breached: " + "; ".join(breaches))
+         logger.info("quality_gates_passed", extra=metrics.as_dict())
+@@ -230,12 +236,13 @@
+                     "version": self.config.version,
+                 },
+                 target,
+             )
+         except OSError as exc:
+-            logger.error("model_persist_failed", extra={"path": str(target),
+-                                                        "error": str(exc)})
++            logger.error(
++                "model_persist_failed", extra={"path": str(target), "error": str(exc)}
++            )
+             raise ModelTrainingError(f"Could not write artifact to {target}") from exc
+ 
+         logger.info("model_artifact_saved", extra={"path": str(target)})
+         return target
+ 
+would reformat C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 2\Group_84\src\loan_risk\models\trainer.py
+
+Oh no! \U0001f4a5 \U0001f494 \U0001f4a5
+13 files would be reformatted, 12 files would be left unchanged.

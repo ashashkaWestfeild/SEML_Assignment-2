@@ -1,0 +1,69 @@
+# ==============================================================
+# Loan Approval Risk Service - central configuration
+# Assignment II | Group 84 | AIMLCZG546 SEML
+# Every tunable constant lives here (no magic numbers in code).
+# ==============================================================
+app:
+  name: "Loan Approval Risk Service"
+  version: "2.0.0"
+  env: "production"
+
+paths:
+  raw_data: "data/Loan.csv"
+  processed_data: "data/loan_data_processed.csv"
+  reference_data: "data/reference_profile.csv"
+  model_artifact: "artifacts/model.joblib"
+  metrics_dir: "reports/metrics"
+
+model:
+  algorithm: "random_forest"
+  n_estimators: 200
+  max_depth: 12
+  min_samples_leaf: 5
+  random_state: 42
+  test_size: 0.2
+  default_threshold: 0.50
+  target: "LoanApproved"
+  features:
+    - Age
+    - AnnualIncome
+    - CreditScore
+    - EmploymentStatus
+    - EducationLevel
+    - LoanAmount
+    - LoanDuration
+    - MonthlyDebtPayments
+    - CreditCardUtilizationRate
+    - DebtToIncomeRatio
+    - BankruptcyHistory
+    - LoanPurpose
+    - PreviousLoanDefaults
+    - PaymentHistory
+    - LengthOfCreditHistory
+    - SavingsAccountBalance
+    - CheckingAccountBalance
+    - TotalLiabilities
+    - JobTenure
+    - NetWorth
+    - LoanToIncomeRatio
+    - SavingsToLoanRatio
+
+# Release gates - CI fails the build if a metric falls below these.
+quality_gates:
+  min_accuracy: 0.80
+  min_f1: 0.80
+  min_roc_auc: 0.85
+  max_brier_score: 0.15
+  max_latency_ms: 150.0
+  max_missing_fraction: 0.02
+  max_psi: 0.20
+
+business_rules:
+  min_annual_income: 1000
+  max_loan_to_income_multiple: 5.0
+  risk_tier_low_threshold: 0.70
+  risk_tier_medium_threshold: 0.40
+
+logging:
+  level: "INFO"
+  format: "json"

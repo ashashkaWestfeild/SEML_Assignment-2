@@ -1,0 +1,50 @@
+{
+  "winner": "random_forest",
+  "algorithm_comparison": {
+    "logistic_regression": {
+      "accuracy": 0.903,
+      "f1": 0.878901,
+      "precision": 0.884978,
+      "recall": 0.872908,
+      "roc_auc": 0.968619,
+      "brier_score": 0.069252,
+      "log_loss": 0.223033,
+      "n_train": 4000,
+      "n_test": 4000
+    },
+    "random_forest": {
+      "accuracy": 0.948,
+      "f1": 0.934343,
+      "precision": 0.951768,
+      "recall": 0.917545,
+      "roc_auc": 0.988084,
+      "brier_score": 0.045828,
+      "log_loss": 0.184114,
+      "n_train": 4000,
+      "n_test": 4000
+    }
+  },
+  "chosen_model_metrics": {
+    "accuracy": 0.948,
+    "f1": 0.934343,
+    "precision": 0.951768,
+    "recall": 0.917545,
+    "roc_auc": 0.988084,
+    "brier_score": 0.045828,
+    "log_loss": 0.184114,
+    "n_train": 4000,
+    "n_test": 4000
+  },
+  "data_quality": {
+    "n_rows": 20000,
+    "n_columns": 23,
+    "schema_conformance_rate": 1.0,
+    "missing_value_fraction": 0.0,
+    "worst_column_missing_fraction": 0.0,
+    "worst_column": "Age",
+    "n_violations": 0,
+    "violations": [],
+    "passed": true
+  },
+  "artifact": "C:\\Users\\singh\\OneDrive\\Documents\\BITS WILP\\Sem 2\\SEML\\SEML Assignment 2\\Group_84\\artifacts\\model.joblib"
+}

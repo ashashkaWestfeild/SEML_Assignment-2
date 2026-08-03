@@ -1,0 +1,45 @@
+legacy\research_feature_prototype.py:5:1: F401 'numpy as np' imported but unused
+legacy\research_feature_prototype.py:5:20: E401 multiple imports on one line
+legacy\research_feature_prototype.py:6:1: F401 'os' imported but unused
+legacy\research_feature_prototype.py:6:1: F401 'sys' imported but unused
+legacy\research_feature_prototype.py:6:1: F401 'json' imported but unused
+legacy\research_feature_prototype.py:6:10: E401 multiple imports on one line
+legacy\research_feature_prototype.py:12:91: E501 line too long (93 > 90 characters)
+legacy\research_feature_prototype.py:14:7: E201 whitespace after '('
+legacy\research_feature_prototype.py:14:17: E202 whitespace before ')'
+legacy\research_feature_prototype.py:18:27: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:22:91: E501 line too long (101 > 90 characters)
+legacy\research_feature_prototype.py:26:9: E225 missing whitespace around operator
+legacy\research_feature_prototype.py:26:16: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:26:31: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:26:45: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:26:58: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:26:78: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:26:91: E501 line too long (203 > 90 characters)
+legacy\research_feature_prototype.py:26:99: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:26:108: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:26:112: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:26:132: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:26:160: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:26:180: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:28:8: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:28:15: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:28:23: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:28:30: E225 missing whitespace around operator
+legacy\research_feature_prototype.py:28:60: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:28:62: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:28:91: E501 line too long (119 > 90 characters)
+legacy\research_feature_prototype.py:30:14: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:31:2: E225 missing whitespace around operator
+legacy\research_feature_prototype.py:32:12: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:32:34: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:34:1: E302 expected 2 blank lines, found 1
+legacy\research_feature_prototype.py:34:16: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:38:1: E305 expected 2 blank lines after class or function definition, found 1
+legacy\research_feature_prototype.py:39:18: E231 missing whitespace after ','
+legacy\research_feature_prototype.py:39:24: E702 multiple statements on one line (semicolon)
+legacy\research_feature_prototype.py:45:1: E722 do not use bare 'except'
+src\loan_risk\api\schemas.py:52:91: E501 line too long (91 > 90 characters)
+src\loan_risk\data\ingestion.py:92:91: E501 line too long (92 > 90 characters)
+src\loan_risk\data\validation.py:110:5: C901 'DataValidator.validate' is too complex (11)
+src\loan_risk\features\engineering.py:41:91: E501 line too long (98 > 90 characters)
