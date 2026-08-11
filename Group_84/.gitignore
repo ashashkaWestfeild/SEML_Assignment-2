@@ -7,6 +7,8 @@ venv/
 
 # Test / tool caches
 .pytest_cache/
+.coverage
+htmlcov/
 .mypy_cache/
 .ruff_cache/
 
