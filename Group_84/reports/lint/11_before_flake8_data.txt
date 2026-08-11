@@ -1,0 +1,16 @@
+# flake8 on the two data scripts inherited unchanged from Assignment I,
+# captured from their pre-fix state in git (commit 49a094b).
+data/generate_synthetic_data.py:73:91: E501 line too long (97 > 90 characters)
+data/generate_synthetic_data.py:78:91: E501 line too long (91 > 90 characters)
+data/generate_synthetic_data.py:79:91: E501 line too long (92 > 90 characters)
+data/generate_synthetic_data.py:81:91: E501 line too long (97 > 90 characters)
+data/generate_synthetic_data.py:97:91: E501 line too long (102 > 90 characters)
+data/generate_synthetic_data.py:107:91: E501 line too long (92 > 90 characters)
+data/generate_synthetic_data.py:108:91: E501 line too long (92 > 90 characters)
+data/generate_synthetic_data.py:109:91: E501 line too long (93 > 90 characters)
+data/generate_synthetic_data.py:110:91: E501 line too long (91 > 90 characters)
+data/prepare_data.py:3:1: F401 'numpy as np' imported but unused
+data/prepare_data.py:4:1: F401 'sklearn.ensemble.RandomForestClassifier' imported but unused
+data/prepare_data.py:5:1: F401 'sklearn.model_selection.train_test_split' imported but unused
+data/prepare_data.py:50:91: E501 line too long (105 > 90 characters)
+data/prepare_data.py:51:91: E501 line too long (98 > 90 characters)

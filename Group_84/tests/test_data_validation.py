@@ -7,6 +7,8 @@ regression suite: schema conformance, missing values and distribution drift.
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -116,9 +118,63 @@ def test_drift_monitor_flags_only_the_shifted_feature(synthetic_frame):
 
 
 # ── ingestion contract ───────────────────────────────────────────────────
+def test_ingestor_reads_a_valid_csv(tmp_path, synthetic_frame):
+    """The happy path: a well-formed CSV round-trips into a dataframe."""
+    path = tmp_path / "clean.csv"
+    synthetic_frame.to_csv(path, index=False)
+    loaded = DataIngestor().load(path)
+    assert loaded.shape == synthetic_frame.shape
+    assert list(loaded.columns) == list(synthetic_frame.columns)
+
+
 def test_ingestor_rejects_a_missing_file(tmp_path):
     with pytest.raises(DataIngestionError):
         DataIngestor().load(tmp_path / "nope.csv")
+
+
+def test_ingestor_rejects_a_completely_empty_file(tmp_path):
+    """A zero-byte file raises pandas' EmptyDataError -> one domain error."""
+    path = tmp_path / "empty.csv"
+    path.write_text("", encoding="utf-8")
+    with pytest.raises(DataIngestionError, match="empty"):
+        DataIngestor().load(path)
+
+
+def test_ingestor_rejects_a_header_only_file(tmp_path):
+    """Headers but no rows parses fine, so it needs its own explicit guard."""
+    path = tmp_path / "headers.csv"
+    path.write_text("Age,AnnualIncome,CreditScore\n", encoding="utf-8")
+    with pytest.raises(DataIngestionError, match="zero rows"):
+        DataIngestor().load(path)
+
+
+def test_ingestor_rejects_an_unparseable_file(tmp_path):
+    """Ragged rows raise pandas' ParserError -> the same domain error."""
+    path = tmp_path / "ragged.csv"
+    path.write_text("a,b\n1,2\n3,4,5,6,7\n", encoding="utf-8")
+    with pytest.raises(DataIngestionError):
+        DataIngestor().load(path)
+
+
+def test_ingestor_warns_but_continues_on_duplicate_rows(
+    tmp_path, synthetic_frame, caplog
+):
+    """Duplicates are recoverable: WARNING, not ERROR, and the load succeeds.
+
+    This asserts the log-level policy stated in the report, not just that the
+    code runs -- a duplicate that silently vanished would be worse than one
+    that is loudly reported and kept.
+    """
+    path = tmp_path / "dupes.csv"
+    doubled = pd.concat([synthetic_frame.head(50)] * 2, ignore_index=True)
+    doubled.to_csv(path, index=False)
+
+    with caplog.at_level(logging.WARNING, logger="loan_risk.data.ingestion"):
+        loaded = DataIngestor().load(path)
+
+    assert len(loaded) == 100
+    assert any(r.message == "duplicate_rows_detected" for r in caplog.records)
+    assert all(r.levelno == logging.WARNING for r in caplog.records)
 
 
 def test_ingestor_rejects_a_frame_missing_contract_columns(synthetic_frame):

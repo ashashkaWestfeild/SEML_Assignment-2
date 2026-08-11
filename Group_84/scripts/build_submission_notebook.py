@@ -182,7 +182,7 @@ comparison = pd.DataFrame([
     ("Unguarded division", "inf / ZeroDivisionError", "safe_ratio() +1 smoothing + finiteness check"),
     ("Feature list retyped", "Training/serving skew", "One FEATURE_ORDER contract, re-imposed on transform"),
     ("except: pass", "Silent failures", "Typed exceptions; every handler logs and re-raises"),
-    ("No logging / types / tests", "Nothing observable or verifiable", "JSON logging, type hints, 84 tests"),
+    ("No logging / types / tests", "Nothing observable or verifiable", "JSON logging, type hints, 89 tests"),
     ("Logic in notebook cells", "Cannot be imported or tested", "Importable package"),
 ], columns=["Research code", "Consequence in production", "Production answer"])
 comparison.index += 1
@@ -419,7 +419,7 @@ pd.DataFrame(rows, columns=["Scenario", "Expected", "Actual", "Result"])
 
 ## 6. Test Types Implemented
 
-84 tests across four distinct types, tagged with pytest markers so each layer
+89 tests across four distinct types, tagged with pytest markers so each layer
 can run independently in CI.
 """,
     ),
@@ -448,6 +448,34 @@ summary = pd.DataFrame([
 summary["Count"] = [sum(1 for t in inventory if f"/{f}::" in t) for f in summary["File"]]
 summary.loc[len(summary)] = ["TOTAL", "", "", summary["Count"].sum()]
 summary
+""",
+    ),
+    (
+        "markdown",
+        """### Coverage
+
+A passing suite says nothing about what it never executes, so line coverage is
+measured too. It is **reported, not gated** — a coverage target is easy to game
+with assertion-free tests, so it is used to find blind spots rather than to
+certify quality.
+
+It found one: `data/ingestion.py` sat at **64%** — the module whose error
+handling Section 3 singles out as Critical Function 1 was the least-exercised in
+the codebase, because only its missing-file branch was tested. Five tests were
+added for the remaining paths, taking that module to **100%** and the total from
+91% to 93%.
+""",
+    ),
+    (
+        "code",
+        """\
+coverage_path = PROJECT_ROOT / "reports" / "metrics" / "coverage_report.txt"
+rows = [
+    line
+    for line in coverage_path.read_text(encoding="utf-8").splitlines()
+    if line.startswith(("Name", "src", "TOTAL", "---"))
+]
+print("\\n".join(rows))
 """,
     ),
     (
@@ -777,9 +805,9 @@ profile are deployment assets, not public ones — belongs in the same list.
 | 1. Refactor (OOP / FP) | `src/loan_risk/` — 11 modules, one responsibility each | Section 1 |
 | 2. Research vs production | `notebooks/research_prototype.ipynb` vs `features/engineering.py` | Section 2 |
 | 3. Error handling & logging | Typed exceptions + JSON logging across 3 critical functions | Section 3 |
-| 4. Formatting & linting | flake8 45 → 0, black/isort clean, pylint 9.72 → 10.00 | Section 4, `reports/lint/` |
+| 4. Formatting & linting | flake8 59 → 0, black/isort clean, pylint 9.72 → 10.00 | Section 4, `reports/lint/` |
 | 5. REST API | FastAPI, versioned paths, 5 status codes, bounded batch | Section 5 |
-| 6. Two+ test types | 4 types, 84 tests, all passing | Section 6 |
+| 6. Two+ test types | 4 types, 89 tests, 93% line coverage | Section 6 |
 | 7. ML tests | Overfit-batch, loss-decreases, shape/range, directional, invariance | Section 7 |
 | 8. Metrics | 4 model-quality + 4 data-quality, all gated | Section 8 |
 | 9. Production testing & security | Shadow → canary → A/B holdout; input-boundary controls | Section 9 |

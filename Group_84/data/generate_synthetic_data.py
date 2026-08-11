@@ -17,8 +17,10 @@ Usage:
     python data/generate_synthetic_data.py            # 20,000 rows -> data/Loan.csv
     python data/generate_synthetic_data.py --rows 5000
 """
-import os
+
 import argparse
+import os
+
 import numpy as np
 import pandas as pd
 
@@ -69,16 +71,24 @@ def generate(n_rows: int = 20_000, seed: int = RNG_SEED) -> pd.DataFrame:
     dti = np.clip((monthly_debt * 12) / (annual_income + 1), 0, 3).round(3)
     bankruptcy = (rng.uniform(0, 1, n_rows) < 0.06).astype(int)
     prev_defaults = (rng.uniform(0, 1, n_rows) < 0.14).astype(int)
-    payment_history = rng.integers(0, 49, n_rows)          # months of clean history
-    credit_history_len = np.clip((age - 18) * rng.uniform(0.3, 1.0, n_rows), 0, None).astype(int)
+    payment_history = rng.integers(0, 49, n_rows)  # months of clean history
+    credit_history_len = np.clip(
+        (age - 18) * rng.uniform(0.3, 1.0, n_rows), 0, None
+    ).astype(int)
     utility_history = np.clip(rng.beta(6, 2, n_rows), 0, 1).round(3)
     job_tenure = np.clip(rng.integers(0, 25, n_rows), 0, experience)
 
     # ── Assets / liabilities ────────────────────────────────────────
-    savings = np.clip((annual_income * rng.uniform(0.0, 0.9, n_rows)).astype(int), 0, None)
-    checking = np.clip((annual_income * rng.uniform(0.0, 0.3, n_rows)).astype(int), 0, None)
+    savings = np.clip(
+        (annual_income * rng.uniform(0.0, 0.9, n_rows)).astype(int), 0, None
+    )
+    checking = np.clip(
+        (annual_income * rng.uniform(0.0, 0.3, n_rows)).astype(int), 0, None
+    )
     total_assets = np.clip(
-        (savings + checking + annual_income * rng.uniform(0.5, 5.0, n_rows)).astype(int), 0, None
+        (savings + checking + annual_income * rng.uniform(0.5, 5.0, n_rows)).astype(int),
+        0,
+        None,
     )
     total_liabilities = np.clip(
         (loan_amount * rng.uniform(0.3, 2.0, n_rows)).astype(int), 0, None
@@ -91,10 +101,16 @@ def generate(n_rows: int = 20_000, seed: int = RNG_SEED) -> pd.DataFrame:
     interest_rate = (base_rate + risk_premium).clip(0.03, 0.35).round(4)
     r_month = interest_rate / 12
     monthly_loan_payment = (
-        loan_amount * r_month * (1 + r_month) ** loan_duration
+        loan_amount
+        * r_month
+        * (1 + r_month) ** loan_duration
         / ((1 + r_month) ** loan_duration - 1)
     ).round(2)
-    total_dti = ((monthly_debt + monthly_loan_payment) * 12 / (annual_income + 1)).clip(0, 5).round(3)
+    total_dti = (
+        ((monthly_debt + monthly_loan_payment) * 12 / (annual_income + 1))
+        .clip(0, 5)
+        .round(3)
+    )
 
     # ── Latent creditworthiness -> LoanApproved (learnable signal) ──
     # A mix of linear terms AND non-linear interactions / thresholds. The
@@ -104,10 +120,12 @@ def generate(n_rows: int = 20_000, seed: int = RNG_SEED) -> pd.DataFrame:
     loan_to_income = loan_amount / (annual_income + 1)
 
     # Non-linear / interaction structure (trees excel here, linear models don't)
-    sweet_spot = ((credit_score >= 660) & (dti < 0.35)).astype(float)      # AND interaction
-    either_bad = ((credit_score < 580) | (cc_util > 0.70)).astype(float)   # OR (non-linear)
-    double_hit = (prev_defaults * bankruptcy).astype(float)                # compounding risk
-    over_leveraged = (loan_to_income > 2.5).astype(float)                  # step threshold
+    sweet_spot = ((credit_score >= 660) & (dti < 0.35)).astype(float)  # AND interaction
+    either_bad = ((credit_score < 580) | (cc_util > 0.70)).astype(
+        float
+    )  # OR (non-linear)
+    double_hit = (prev_defaults * bankruptcy).astype(float)  # compounding risk
+    over_leveraged = (loan_to_income > 2.5).astype(float)  # step threshold
 
     z = (
         0.35
@@ -124,7 +142,7 @@ def generate(n_rows: int = 20_000, seed: int = RNG_SEED) -> pd.DataFrame:
         - 2.4 * either_bad
         - 2.0 * double_hit
         - 1.6 * over_leveraged
-        + rng.normal(0, 0.45, n_rows)                      # irreducible noise
+        + rng.normal(0, 0.45, n_rows)  # irreducible noise
     )
     prob = 1 / (1 + np.exp(-z))
     loan_approved = (prob > 0.5).astype(int)
@@ -136,44 +154,46 @@ def generate(n_rows: int = 20_000, seed: int = RNG_SEED) -> pd.DataFrame:
         rng.integers(0, 730, n_rows), unit="D"
     )
 
-    df = pd.DataFrame({
-        "ApplicationDate": application_date.strftime("%Y-%m-%d"),
-        "Age": age,
-        "AnnualIncome": annual_income,
-        "CreditScore": credit_score,
-        "EmploymentStatus": employment,
-        "EducationLevel": education,
-        "Experience": experience,
-        "LoanAmount": loan_amount,
-        "LoanDuration": loan_duration,
-        "MaritalStatus": marital,
-        "NumberOfDependents": dependents,
-        "HomeOwnershipStatus": home,
-        "MonthlyDebtPayments": monthly_debt,
-        "CreditCardUtilizationRate": cc_util,
-        "NumberOfOpenCreditLines": open_lines,
-        "NumberOfCreditInquiries": inquiries,
-        "DebtToIncomeRatio": dti,
-        "BankruptcyHistory": bankruptcy,
-        "LoanPurpose": purpose,
-        "PreviousLoanDefaults": prev_defaults,
-        "PaymentHistory": payment_history,
-        "LengthOfCreditHistory": credit_history_len,
-        "SavingsAccountBalance": savings,
-        "CheckingAccountBalance": checking,
-        "TotalAssets": total_assets,
-        "TotalLiabilities": total_liabilities,
-        "MonthlyIncome": monthly_income,
-        "UtilityBillsPaymentHistory": utility_history,
-        "JobTenure": job_tenure,
-        "NetWorth": net_worth,
-        "BaseInterestRate": base_rate,
-        "InterestRate": interest_rate,
-        "MonthlyLoanPayment": monthly_loan_payment,
-        "TotalDebtToIncomeRatio": total_dti,
-        "LoanApproved": loan_approved,
-        "RiskScore": risk_score,
-    })
+    df = pd.DataFrame(
+        {
+            "ApplicationDate": application_date.strftime("%Y-%m-%d"),
+            "Age": age,
+            "AnnualIncome": annual_income,
+            "CreditScore": credit_score,
+            "EmploymentStatus": employment,
+            "EducationLevel": education,
+            "Experience": experience,
+            "LoanAmount": loan_amount,
+            "LoanDuration": loan_duration,
+            "MaritalStatus": marital,
+            "NumberOfDependents": dependents,
+            "HomeOwnershipStatus": home,
+            "MonthlyDebtPayments": monthly_debt,
+            "CreditCardUtilizationRate": cc_util,
+            "NumberOfOpenCreditLines": open_lines,
+            "NumberOfCreditInquiries": inquiries,
+            "DebtToIncomeRatio": dti,
+            "BankruptcyHistory": bankruptcy,
+            "LoanPurpose": purpose,
+            "PreviousLoanDefaults": prev_defaults,
+            "PaymentHistory": payment_history,
+            "LengthOfCreditHistory": credit_history_len,
+            "SavingsAccountBalance": savings,
+            "CheckingAccountBalance": checking,
+            "TotalAssets": total_assets,
+            "TotalLiabilities": total_liabilities,
+            "MonthlyIncome": monthly_income,
+            "UtilityBillsPaymentHistory": utility_history,
+            "JobTenure": job_tenure,
+            "NetWorth": net_worth,
+            "BaseInterestRate": base_rate,
+            "InterestRate": interest_rate,
+            "MonthlyLoanPayment": monthly_loan_payment,
+            "TotalDebtToIncomeRatio": total_dti,
+            "LoanApproved": loan_approved,
+            "RiskScore": risk_score,
+        }
+    )
     return df
 
 

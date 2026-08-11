@@ -376,7 +376,18 @@ def load_artifacts() -> Dict[str, Any]:
         .splitlines()
         if "passed" in line or "failed" in line
     ]
+    coverage_raw = (METRICS / "coverage_report.txt").read_text(encoding="utf-8")
+    coverage_rows = [
+        ln
+        for ln in coverage_raw.splitlines()
+        if ln.startswith(("Name", "src", "TOTAL", "---"))
+    ]
+    coverage_total = next(
+        ln.split()[-1] for ln in coverage_rows if ln.startswith("TOTAL")
+    )
+    coverage_tail = "\n".join(ln[:66] for ln in coverage_rows if not ln.startswith("---"))
     before_flake8 = (LINT / "01_before_flake8.txt").read_text(encoding="utf-8")
+    before_flake8_data = (LINT / "11_before_flake8_data.txt").read_text(encoding="utf-8")
     return {
         "qa": qa,
         "training": training,
@@ -384,6 +395,9 @@ def load_artifacts() -> Dict[str, Any]:
         "tests": tests,
         "pytest_tail": pytest_tail[-1] if pytest_tail else "",
         "before_flake8": before_flake8,
+        "before_flake8_data": before_flake8_data,
+        "coverage_total": coverage_total,
+        "coverage_tail": coverage_tail,
     }
 
 
@@ -885,6 +899,12 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
 
     # ---------------- 4. linting ----------------
     before_lines = [ln for ln in art["before_flake8"].splitlines() if ln.strip()]
+    before_data = [
+        ln
+        for ln in art["before_flake8_data"].splitlines()
+        if ln.strip() and not ln.startswith("#")
+    ]
+    before_total = len(before_lines) + len(before_data)
     story += [
         para("4. Code Formatting and Linting", "h2"),
         para(
@@ -905,8 +925,8 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             f"The <b>before</b> snapshot was taken on the codebase as first "
             f"written, together with the untouched research code in "
             f"<font face='Courier'>legacy/</font>. It reported "
-            f"<b>{len(before_lines)} flake8 violations</b> across the tree and "
-            "<b>13 files</b> that black would reformat. The formatters were "
+            f"<b>{before_total} flake8 violations</b> across the tree and "
+            "<b>15 files</b> that black would reformat. The formatters were "
             "then run, and the two findings the formatters cannot fix were "
             "repaired by hand — one of which was a genuine design issue "
             "(<font face='Courier'>C901</font>: "
@@ -923,7 +943,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
                     "flake8 violations",
                     "<font face='Courier'>python -m flake8 src scripts tests legacy"
                     "</font>",
-                    f"{len(before_lines)}",
+                    f"{before_total}",
                     "<b>0</b>",
                 ],
                 [
@@ -1174,12 +1194,38 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             f"{art['pytest_tail']}\n"
             "\n"
             "$ python -m pytest tests -m unit --co -q\n"
-            f"{count('test_unit_features')}/84 tests collected "
-            f"({84 - count('test_unit_features')} deselected)"
+            f"{count('test_unit_features')}/{len(tests)} tests collected "
+            f"({len(tests) - count('test_unit_features')} deselected)"
         ),
         para(
             "Listing 7: full-suite result. Raw output is stored in "
             "<font face='Courier'>reports/metrics/pytest_output.txt</font>.",
+            "caption",
+        ),
+        para("Coverage", "h3"),
+        para(
+            "A passing suite says nothing about what it never executes, so line "
+            f"coverage is measured as well: <b>{art['coverage_total']}</b> across "
+            "the package. Coverage is reported rather than gated — a coverage "
+            "target is easy to satisfy with assertion-free tests, so it is used "
+            "here to find blind spots, not to certify quality."
+        ),
+        para(
+            "It did find one. In an earlier revision "
+            "<font face='Courier'>data/ingestion.py</font> sat at <b>64%</b> — "
+            "the module whose error handling Section 3 singles out as Critical "
+            "Function 1 was the least-exercised in the codebase, because the "
+            "tests only covered the missing-file branch. Five tests were added "
+            "for the remaining paths (valid read, empty file, header-only file, "
+            "unparseable rows, and the duplicate-row WARNING), taking that "
+            "module to <b>100%</b> and raising the total from 91% to "
+            f"{art['coverage_total']}.",
+        ),
+        code(art["coverage_tail"]),
+        para(
+            "Listing 8: per-module coverage. Full report with missing line "
+            "numbers: "
+            "<font face='Courier'>reports/metrics/coverage_report.txt</font>.",
             "caption",
         ),
     ]
@@ -1235,7 +1281,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
         code(
             defn("tests/test_model_training.py", "test_model_can_overfit_a_small_batch")
         ),
-        para("Listing 8: the canonical overfit-a-small-batch test.", "caption"),
+        para("Listing 9: the canonical overfit-a-small-batch test.", "caption"),
         para(
             "Measured loss curve produced by the capacity sweep: "
             "<b>0.4290 → 0.2936 → 0.1146 → 0.0940</b> for "
@@ -1316,7 +1362,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             )
         ),
         para(
-            "Listing 9: directional tests. They assert the weak inequality — a "
+            "Listing 10: directional tests. They assert the weak inequality — a "
             "tree ensemble is not globally monotonic, and demanding strict "
             "monotonicity would produce a flaky test that teams learn to "
             "ignore.",
@@ -1352,7 +1398,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             )
         ),
         para(
-            "Listing 10: the fix, with the reason recorded at the point of "
+            "Listing 11: the fix, with the reason recorded at the point of "
             "the decision and a pointer back to the test that found it.",
             "caption",
         ),
@@ -1757,7 +1803,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             "│   ├── models/predictor.py        # ModelRegistry + RiskPredictor\n"
             "│   ├── monitoring/drift.py        # DriftMonitor   -> DQ-3, DQ-4\n"
             "│   └── api/{schemas,app}.py       # FastAPI contract and routes\n"
-            "├── tests/                         # 84 tests: unit | integration "
+            "├── tests/                         # 89 tests: unit | integration "
             "| data | ml\n"
             "├── scripts/                       # train, evaluate, render "
             "evidence, build report\n"

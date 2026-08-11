@@ -12,7 +12,7 @@ metrics.
 | Executed notebook (submission) | `../Group_84.ipynb` |
 | Research-code exemplar | `notebooks/research_prototype.ipynb`, `legacy/research_feature_prototype.py` |
 | Production package | `src/loan_risk/` |
-| Test suite | `tests/` (84 tests) |
+| Test suite | `tests/` (89 tests, 93% line coverage) |
 | Lint evidence | `reports/lint/` |
 | Metrics & figures | `reports/metrics/`, `reports/figures/` |
 
@@ -106,14 +106,15 @@ python -m black src scripts tests
 ```
 
 ```bash
-python -m flake8 src scripts tests
+python -m flake8 src scripts tests data
 ```
 
 ```bash
 python -m pylint src/loan_risk
 ```
 
-Current state: **flake8 0 violations**, **black/isort clean**, **pylint 10.00/10**.
+Current state: **flake8 0 violations**, **black/isort clean**, **pylint 10.00/10**,
+**89 tests passing at 93% line coverage**.
 The `legacy/` directory is excluded from the formatters on purpose — it is the
 "before" evidence for Objective 1.4.
 

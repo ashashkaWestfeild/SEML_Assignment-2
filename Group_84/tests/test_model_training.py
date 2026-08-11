@@ -90,9 +90,7 @@ def test_shuffled_labels_destroy_generalisation(xy):
     is meaningless.
     """
     features, labels = xy
-    rng = np.random.default_rng(42)
     shuffled = labels.sample(frac=1.0, random_state=42).reset_index(drop=True)
-    _ = rng  # seed documented above; kept explicit for readability
 
     x_train, x_test, y_train, y_test = train_test_split(
         features.reset_index(drop=True), shuffled, test_size=0.3, random_state=42
@@ -126,10 +124,10 @@ def test_quality_gates_reject_a_weak_model(xy):
     pipeline.fit(x_train.head(20), y_train.head(20))
     weak_metrics = trainer.evaluate(x_test, y_test)
 
-    if weak_metrics.roc_auc < settings.gates.min_roc_auc:
-        with pytest.raises(ModelTrainingError, match="Quality gates breached"):
-            trainer.enforce_quality_gates(weak_metrics)
-    else:  # pragma: no cover - the stump got lucky; assert the gate still runs
+    # Seeded end to end, so the stump's AUC (~0.53) is deterministic and this
+    # assertion is unconditional -- a guarded version could pass vacuously.
+    assert weak_metrics.roc_auc < settings.gates.min_roc_auc
+    with pytest.raises(ModelTrainingError, match="Quality gates breached"):
         trainer.enforce_quality_gates(weak_metrics)
 
 
