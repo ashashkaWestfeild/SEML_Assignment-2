@@ -37,9 +37,7 @@ def test_model_can_overfit_a_small_batch(xy):
     trainer = ModelTrainer(settings)
     trainer.train(small_x, small_y, evaluate=False)
     train_accuracy = trainer.pipeline.score(small_x, small_y)
-    assert train_accuracy >= 0.95, (
-        f"Could not overfit 40 rows: {train_accuracy:.3f}"
-    )
+    assert train_accuracy >= 0.95, f"Could not overfit 40 rows: {train_accuracy:.3f}"
 
 
 def test_training_loss_decreases_with_capacity(xy):
@@ -61,14 +59,10 @@ def test_training_loss_decreases_with_capacity(xy):
             model__min_samples_leaf=1,
         )
         pipeline.fit(batch_x, batch_y)
-        probabilities = np.clip(
-            pipeline.predict_proba(batch_x)[:, 1], 1e-9, 1 - 1e-9
-        )
+        probabilities = np.clip(pipeline.predict_proba(batch_x)[:, 1], 1e-9, 1 - 1e-9)
         losses.append(log_loss(batch_y, probabilities))
 
-    assert losses == sorted(losses, reverse=True), (
-        f"Loss did not decrease: {losses}"
-    )
+    assert losses == sorted(losses, reverse=True), f"Loss did not decrease: {losses}"
     assert losses[-1] < losses[0] / 2.0
 
 
@@ -79,9 +73,7 @@ def test_training_is_reproducible(xy):
     for _ in range(2):
         trainer = ModelTrainer(settings)
         trainer.train(features, labels, evaluate=False)
-        predictions.append(
-            trainer.pipeline.predict_proba(features.head(50))[:, 1]
-        )
+        predictions.append(trainer.pipeline.predict_proba(features.head(50))[:, 1])
     np.testing.assert_allclose(predictions[0], predictions[1])
 
 
@@ -92,9 +84,7 @@ def test_training_rejects_single_class_labels(xy):
     features, labels = xy
     all_zeros = labels.head(100) * 0  # all labels = 0
     with pytest.raises(ModelTrainingError, match="single class"):
-        ModelTrainer(settings).train(
-            features.head(100), all_zeros, evaluate=False
-        )
+        ModelTrainer(settings).train(features.head(100), all_zeros, evaluate=False)
 
 
 @pytest.mark.parametrize("n_rows", [10, 20, 50])

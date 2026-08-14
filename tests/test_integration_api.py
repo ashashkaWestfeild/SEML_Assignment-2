@@ -43,7 +43,9 @@ def test_predict_returns_200_and_a_complete_payload(api_client, valid_applicatio
 
 
 # ── schema validation (422) ──────────────────────────────────────────────
-def test_predict_rejects_out_of_range_credit_score_with_422(api_client, valid_application):
+def test_predict_rejects_out_of_range_credit_score_with_422(
+    api_client, valid_application
+):
     """credit_score=1500 exceeds the declared maximum (850) and must be rejected."""
     payload = {**valid_application, "credit_score": 1500}
     response = api_client.post("/v1/predict", json=payload)
@@ -51,7 +53,9 @@ def test_predict_rejects_out_of_range_credit_score_with_422(api_client, valid_ap
 
 
 # ── business rule rejection (400) ────────────────────────────────────────
-def test_predict_rejects_overleveraged_application_with_400(api_client, valid_application):
+def test_predict_rejects_overleveraged_application_with_400(
+    api_client, valid_application
+):
     """Loan amount exceeding 5x annual income must trigger a business rule rejection."""
     payload = {**valid_application, "annual_income": 20000, "loan_amount": 500000}
     response = api_client.post("/v1/predict", json=payload)

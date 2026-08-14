@@ -68,9 +68,7 @@ def test_single_prediction_returns_a_well_formed_assessment(predictor):
 
 
 @pytest.mark.parametrize("credit_score", [300, 500, 650, 750, 850])
-def test_probability_is_bounded_across_credit_score_range(
-    predictor, credit_score
-):
+def test_probability_is_bounded_across_credit_score_range(predictor, credit_score):
     """Probability must stay in [0, 1] for all valid credit scores,
     including boundary values at the schema extremes (300, 850).
     """
@@ -86,22 +84,22 @@ def test_higher_credit_score_does_not_reduce_approval_probability(predictor):
     assert excellent >= poor, (poor, excellent)
 
 
-@pytest.mark.parametrize("low,high", [
-    (300, 500),
-    (500, 700),
-    (700, 850),
-])
-def test_directional_credit_score_across_boundary_pairs(
-    predictor, low, high
-):
+@pytest.mark.parametrize(
+    "low,high",
+    [
+        (300, 500),
+        (500, 700),
+        (700, 850),
+    ],
+)
+def test_directional_credit_score_across_boundary_pairs(predictor, low, high):
     """Directional expectation must hold across multiple credit score
     boundary pairs, not just a single convenient pair.
     """
     score_low = _score(predictor, CreditScore=low)
     score_high = _score(predictor, CreditScore=high)
     assert score_high >= score_low, (
-        f"CreditScore {low}->{high}: "
-        f"prob {score_low:.4f}->{score_high:.4f}"
+        f"CreditScore {low}->{high}: " f"prob {score_low:.4f}->{score_high:.4f}"
     )
 
 
@@ -109,9 +107,7 @@ def test_lower_debt_to_income_does_not_reduce_probability(predictor):
     """Less debt relative to income should be at least as good."""
     high_dti = _score(predictor, DebtToIncomeRatio=0.8)
     low_dti = _score(predictor, DebtToIncomeRatio=0.05)
-    assert low_dti >= high_dti, (
-        f"DTI 0.8->{0.05}: prob {high_dti:.4f}->{low_dti:.4f}"
-    )
+    assert low_dti >= high_dti, f"DTI 0.8->{0.05}: prob {high_dti:.4f}->{low_dti:.4f}"
 
 
 # ── invariance expectations ──────────────────────────────────────────────

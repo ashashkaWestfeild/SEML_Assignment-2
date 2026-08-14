@@ -12,7 +12,7 @@ metrics.
 | Executed notebook (submission) | `../Group_84.ipynb` |
 | Research-code exemplar | `notebooks/research_prototype.ipynb`, `legacy/research_feature_prototype.py` |
 | Production package | `src/loan_risk/` |
-| Test suite | `tests/` (84 tests) |
+| Test suite | `tests/` (33 tests) |
 | Lint evidence | `reports/lint/` |
 | Metrics & figures | `reports/metrics/`, `reports/figures/` |
 

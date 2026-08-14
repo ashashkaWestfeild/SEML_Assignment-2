@@ -12,7 +12,7 @@ import nbformat as nbf
 from nbclient import NotebookClient
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-OUT = PROJECT_ROOT.parent / "Group_84.ipynb"
+OUT = PROJECT_ROOT / "Group_84.ipynb"
 
 
 def _read(relative_path: str) -> str:
@@ -84,7 +84,6 @@ CELLS: list[tuple[str, str]] = [
 """,
     ),
     ("code", BOOTSTRAP),
-
     # ==================== TASK 1 ====================
     (
         "markdown",
@@ -230,7 +229,6 @@ except Exception as exc:
     print(f"Immutability enforced: {type(exc).__name__} - {exc}")
 """,
     ),
-
     # ==================== TASK 2 ====================
     (
         "markdown",
@@ -307,7 +305,6 @@ except FeatureEngineeringError as exc:
     print(f"Missing column detected: {exc}")
 """,
     ),
-
     # ==================== TASK 3 ====================
     (
         "markdown",
@@ -409,7 +406,6 @@ except ModelTrainingError as exc:
     print(f"Message: {exc}")
 """,
     ),
-
     # ==================== TASK 4 ====================
     (
         "markdown",
@@ -460,7 +456,6 @@ from IPython.display import Image, display
 display(Image(str(PROJECT_ROOT / "reports" / "figures" / "lint_before_after.png"), width=760))
 """,
     ),
-
     # ==================== TASK 5 ====================
     (
         "markdown",
@@ -574,7 +569,6 @@ r3 = client.post("/v1/predict", json=over_leveraged)
 print(f"  loan > 5x income      -> {r3.status_code} (Business rule rejection)")
 """,
     ),
-
     # ==================== OBJECTIVE 2 ====================
     (
         "markdown",
@@ -663,7 +657,6 @@ for line in output.splitlines():
         print(line)
 """,
     ),
-
     # ==================== TASK 7 ====================
     (
         "markdown",
@@ -780,7 +773,6 @@ print(f"\\nInvariance test (5 identical calls):")
 print(f"  Unique scores: {len(set(scores))} (must be 1) -> PASS")
 """,
     ),
-
     # ==================== TASK 8 ====================
     (
         "markdown",
@@ -849,7 +841,6 @@ print(f"  Schema conformance rate = {report.schema_conformance_rate:.4f}  (gate:
 print(f"  Missing-value fraction  = {report.missing_value_fraction:.6f}  (gate: <= {settings.gates.max_missing_fraction})  {'PASS' if report.missing_value_fraction <= settings.gates.max_missing_fraction else 'FAIL'}")
 """,
     ),
-
     # ==================== TASK 9 ====================
     (
         "markdown",

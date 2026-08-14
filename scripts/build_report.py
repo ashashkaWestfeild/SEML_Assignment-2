@@ -37,7 +37,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 FIGURES = PROJECT_ROOT / "reports" / "figures"
 METRICS = PROJECT_ROOT / "reports" / "metrics"
 LINT = PROJECT_ROOT / "reports" / "lint"
-OUT = PROJECT_ROOT.parent / "Group_84.pdf"
+OUT = PROJECT_ROOT / "Group_84.pdf"
 
 INK = colors.HexColor("#1f3864")
 ACCENT = colors.HexColor("#c00000")
@@ -1174,7 +1174,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             f"{art['pytest_tail']}\n"
             "\n"
             "$ python -m pytest tests -m unit --co -q\n"
-            f"{count('test_unit_features')}/84 tests collected "
+            f"{count('test_unit_features')}/{len(tests)} tests collected "
             f"({84 - count('test_unit_features')} deselected)"
         ),
         para(
@@ -1307,12 +1307,12 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             + BLANK_LINE
             + defn(
                 "tests/test_model_inference.py",
-                "test_higher_debt_to_income_does_not_increase_approval_probability",
+                "test_lower_debt_to_income_does_not_reduce_probability",
             )
             + BLANK_LINE
             + defn(
                 "tests/test_model_inference.py",
-                "test_a_much_larger_loan_does_not_increase_approval_probability",
+                "test_directional_credit_score_across_boundary_pairs",
             )
         ),
         para(
@@ -1757,7 +1757,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             "│   ├── models/predictor.py        # ModelRegistry + RiskPredictor\n"
             "│   ├── monitoring/drift.py        # DriftMonitor   -> DQ-3, DQ-4\n"
             "│   └── api/{schemas,app}.py       # FastAPI contract and routes\n"
-            "├── tests/                         # 84 tests: unit | integration "
+            f"├── tests/                    # {len(tests)} tests: unit | integration "
             "| data | ml\n"
             "├── scripts/                       # train, evaluate, render "
             "evidence, build report\n"
@@ -1777,7 +1777,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             "features + target\n"
             "python scripts/train_model.py                         # train, "
             "gate, persist\n"
-            "python -m pytest tests -v                             # 84 tests\n"
+            f"python -m pytest tests -v                    # {len(tests)} tests\n"
             "python scripts/evaluate_and_report.py                 # metrics + "
             "figures\n"
             "\n"
