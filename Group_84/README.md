@@ -10,7 +10,7 @@ metrics.
 |---|---|
 | Report (submission) | `../Group_84.pdf` |
 | Executed notebook (submission) | `../Group_84.ipynb` |
-| Research-code exemplar | `notebooks/research_prototype.ipynb`, `legacy/research_feature_prototype.py` |
+| Research-code baseline | `legacy/` — Assignment I's submitted code, verbatim |
 | Production package | `src/loan_risk/` |
 | Test suite | `tests/` (80 tests across 55 functions, 93% line coverage) |
 | Lint evidence | `reports/lint/` |
@@ -87,10 +87,10 @@ The build fails if any of these regress (`configs/config.yaml → quality_gates`
 
 | Gate | Threshold | Measured |
 |---|---|---|
-| Accuracy | ≥ 0.80 | **0.9480** |
-| F1 | ≥ 0.80 | **0.9343** |
-| ROC-AUC | ≥ 0.85 | **0.9881** |
-| Brier score | ≤ 0.15 | **0.0458** |
+| Accuracy | ≥ 0.92 | **0.9480** |
+| F1 | ≥ 0.84 | **0.9343** |
+| ROC-AUC | ≥ 0.96 | **0.9881** |
+| Brier score | ≤ 0.07 | **0.0458** |
 | Mean latency | ≤ 150 ms | **10.3 ms** |
 | Missing-value fraction | ≤ 0.02 | **0.0000** |
 | PSI (drift) | ≤ 0.20 | monitored per batch |

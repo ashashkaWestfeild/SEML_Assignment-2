@@ -49,11 +49,15 @@ model:
     - SavingsToLoanRatio
 
 # Release gates - CI fails the build if a metric falls below these.
+# Gates are set just below the weakest configuration that must pass (the 4,000-row
+# test fixture, which scores lower than the 20,000-row production run). A gate set
+# far below anything that could plausibly happen is decoration, not a control:
+# these fire on a regression of roughly one percentage point.
 quality_gates:
-  min_accuracy: 0.80
-  min_f1: 0.80
-  min_roc_auc: 0.85
-  max_brier_score: 0.15
+  min_accuracy: 0.92
+  min_f1: 0.84
+  min_roc_auc: 0.96
+  max_brier_score: 0.07
   max_latency_ms: 150.0
   max_missing_fraction: 0.02
   max_psi: 0.20

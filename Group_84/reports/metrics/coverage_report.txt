@@ -30,4 +30,4 @@ src\loan_risk\monitoring\__init__.py        0      0   100%
 src\loan_risk\monitoring\drift.py          68      7    90%   44, 74, 94, 104-107, 111, 127
 ---------------------------------------------------------------------
 TOTAL                                     659     44    93%
-80 passed, 1 warning in 25.89s
+80 passed, 1 warning in 15.65s

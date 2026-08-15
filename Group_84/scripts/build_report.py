@@ -360,6 +360,11 @@ def decorate(canvas, doc) -> None:
 
 def load_artifacts() -> Dict[str, Any]:
     """Read every measured artifact the report quotes."""
+    import yaml
+
+    gates = yaml.safe_load(
+        (PROJECT_ROOT / "configs" / "config.yaml").read_text(encoding="utf-8")
+    )["quality_gates"]
     qa = json.loads((METRICS / "qa_metrics.json").read_text(encoding="utf-8"))
     training = json.loads((METRICS / "training_metrics.json").read_text(encoding="utf-8"))
     drift = [
@@ -396,6 +401,7 @@ def load_artifacts() -> Dict[str, Any]:
         "pytest_tail": pytest_tail[-1] if pytest_tail else "",
         "before_flake8": before_flake8,
         "before_flake8_data": before_flake8_data,
+        "gates": gates,
         "coverage_total": coverage_total,
         "coverage_tail": coverage_tail,
     }
@@ -408,6 +414,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
     dq = qa["data_quality"]
     lat = qa["latency_ms"]
     comparison = art["training"]["algorithm_comparison"]
+    gates = art["gates"]
     tests = art["tests"]
 
     def count(prefix: str) -> int:
@@ -626,122 +633,164 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
         para("2. Research Code vs Production Code", "h2"),
         para(
             "The component chosen for this comparison is <b>feature "
-            "engineering</b>. Both artefacts are in the repository and both "
-            "compute the same two ratios:"
+            "engineering</b>, and the 'research' half is not an illustrative "
+            "example written for this report. It is <b>Group 84's own "
+            "Assignment I submission, verbatim and unmodified</b>, preserved in "
+            "<font face='Courier'>legacy/</font>. Using code that actually "
+            "shipped is what gives the comparison evidential weight: a foil "
+            "authored alongside the improved version proves nothing, because its "
+            "faults were chosen by the same person who then fixed them."
         ),
     ]
     story += bullets(
         [
-            "<b>Research:</b> <font face='Courier'>notebooks/research_prototype."
-            "ipynb</font> (also exported verbatim as "
-            "<font face='Courier'>legacy/research_feature_prototype.py</font> so "
-            "the linters can be pointed at it).",
-            "<b>Production:</b> <font face='Courier'>src/loan_risk/features/"
-            "engineering.py</font>.",
+            "<b>Research (Assignment I, as submitted):</b> "
+            "<font face='Courier'>legacy/assignment1_serving_pipeline.py</font> "
+            "and <font face='Courier'>legacy/assignment1_prepare_data.py</font>.",
+            "<b>Production (Assignment II):</b> "
+            "<font face='Courier'>src/loan_risk/features/engineering.py</font>.",
         ]
     )
     story += [
         Spacer(1, 0.15 * cm),
         para(
-            "The research notebook is not a strawman — it is what genuinely "
-            "useful exploratory code looks like. It answered the question it "
-            "was written for. The point of the table below is that every one "
-            "of its shortcuts is a defect only once the code has to run "
-            "unattended, and each has a specific engineered answer.",
+            "Assignment I was working software that earned its marks. Every "
+            "entry below was defensible under a deadline; each becomes a defect "
+            "only once the system must run unattended, and each has a specific "
+            "engineered answer here.",
             "body",
         ),
         table(
             [
                 [
                     "#",
-                    "Research code (notebook)",
+                    "Assignment I, as shipped",
                     "Consequence in production",
-                    "Production answer",
+                    "Assignment II answer",
                 ],
                 [
                     "1",
-                    "Hard-coded absolute path "
-                    "<font face='Courier'>C:/Users/analyst/Desktop/…</font>",
-                    "Runs on exactly one machine",
-                    "<font face='Courier'>Settings.path()</font> resolves every "
-                    "path from <font face='Courier'>config.yaml</font>",
+                    "The two ratio formulas are written <b>twice</b>: "
+                    "<font face='Courier'>prepare_data.py</font> STEP 5 for "
+                    "training, <font face='Courier'>extract_features()</font> "
+                    "for serving",
+                    "Training/serving skew the moment either copy is edited - "
+                    "the model scores on features it was not trained on",
+                    "One <font face='Courier'>FeatureEngineer</font> transformer, "
+                    "serialised <i>inside</i> the artifact, so both paths execute "
+                    "the same object",
                 ],
                 [
                     "2",
-                    "<font face='Courier'>train_test_split</font> with no "
-                    "<font face='Courier'>random_state</font>",
-                    "Metrics move every run; results are unauditable",
-                    "<font face='Courier'>random_state</font> from config; "
-                    "<font face='Courier'>test_training_is_reproducible</font> "
-                    "asserts bit-identical output",
+                    "<font face='Courier'>extract_features()</font> builds a "
+                    "22-element <b>positional</b> row and labels it with "
+                    "<font face='Courier'>settings.FEATURES</font>",
+                    "Reordering the config silently mislabels every column; no "
+                    "error is raised",
+                    "<font face='Courier'>FEATURE_ORDER</font> is re-imposed on "
+                    "every transform and asserted by "
+                    "<font face='Courier'>test_prediction_is_invariant_to_"
+                    "column_order</font>",
                 ],
                 [
                     "3",
-                    "<font face='Courier'>LoanAmount/AnnualIncome</font> with "
-                    "no guard",
-                    "<font face='Courier'>inf</font> / "
-                    "<font face='Courier'>ZeroDivisionError</font> on a zero-income "
-                    "application",
-                    "<font face='Courier'>safe_ratio()</font> applies +1 smoothing; "
-                    "a finiteness check raises "
+                    "Ratios computed inline as "
+                    "<font face='Courier'>amount / (income + 1)</font>, the +1 a "
+                    "bare literal",
+                    "The zero-income guard is invisible and unowned; nothing "
+                    "stops the next edit dropping it",
+                    "<font face='Courier'>safe_ratio()</font> is a named, tested "
+                    "function; a finiteness check raises "
                     "<font face='Courier'>FeatureEngineeringError</font>",
                 ],
                 [
                     "4",
-                    "Feature list retyped by hand in the notebook",
-                    "Training/serving skew as soon as one copy changes",
-                    "One <font face='Courier'>FEATURE_ORDER</font> contract, "
-                    "sourced from config and re-imposed on every transform",
+                    "Module-level filters read a global "
+                    "<font face='Courier'>settings</font> import",
+                    "No test can substitute a different configuration without "
+                    "monkey-patching the module",
+                    "Constructor injection of a frozen "
+                    "<font face='Courier'>Settings</font> aggregate",
                 ],
                 [
                     "5",
-                    "Dead variables "
-                    "(<font face='Courier'>tmp</font>, "
-                    "<font face='Courier'>ratio2</font>, "
-                    "<font face='Courier'>x</font>)",
-                    "Reader cannot tell what is load-bearing",
-                    "Every symbol is used; flake8 F401/F841 enforce it",
+                    "Failures raise bare " "<font face='Courier'>ValueError</font>",
+                    "The API cannot tell a policy rejection from a bug, so both "
+                    "collapse into one response",
+                    "Typed hierarchy under "
+                    "<font face='Courier'>LoanRiskError</font>; handlers map each "
+                    "to 400 / 503 / 500",
                 ],
                 [
                     "6",
-                    "<font face='Courier'>except: pass</font>",
-                    "Failures are silent",
-                    "Typed exception hierarchy; every handler logs at a "
-                    "level and re-raises",
+                    "<font face='Courier'>print()</font> for diagnostics in "
+                    "<font face='Courier'>config.py</font> and "
+                    "<font face='Courier'>main.py</font>",
+                    "Unstructured output no aggregator can parse; no levels",
+                    "<font face='Courier'>logger.info(..., extra={...})</font> "
+                    "emitting one JSON object per event at INFO/WARNING/ERROR",
                 ],
                 [
                     "7",
-                    "No logging, no types, no docstrings",
-                    "Nothing is observable; behaviour is undocumented",
-                    "Structured JSON logging, full type hints, docstring on every "
-                    "public callable (pylint 10.00/10)",
+                    "<font face='Courier'>joblib.load</font> called directly in "
+                    "the serving module",
+                    "Artifact custody entangled with request handling",
+                    "<font face='Courier'>ModelRegistry</font> owns loading and "
+                    "reports readiness on <font face='Courier'>/health</font>",
                 ],
                 [
                     "8",
-                    "Logic lives in notebook cells",
-                    "Cannot be imported, reused or unit-tested",
-                    "Importable package; 14 unit tests cover this module alone",
-                ],
-                [
-                    "9",
-                    "<font face='Courier'>print()</font> for diagnostics",
-                    "Unstructured output, unusable by a log aggregator",
-                    "<font face='Courier'>logger.info(..., extra={...})</font> "
-                    "emitting one JSON object per event",
+                    "No automated tests for the feature path",
+                    "Nothing detects a regression in the ratios",
+                    "9 unit tests on this module; 80 across the suite at 93% "
+                    "line coverage",
                 ],
             ],
-            [0.8 * cm, 4.2 * cm, 5.0 * cm, 6.6 * cm],
+            [0.8 * cm, 4.4 * cm, 4.8 * cm, 6.6 * cm],
             align_center=[0],
         ),
         para(
-            "Figure 2: Defect-by-defect mapping from the research notebook to "
-            "its production counterpart.",
+            "Figure 2: Defect-by-defect mapping from Assignment I's shipped code "
+            "to its Assignment II counterpart.",
             "caption",
         ),
         para("Side-by-side: the same computation, twice", "h3"),
         para(
-            "<b>Research</b> — <font face='Courier'>notebooks/research_"
-            "prototype.ipynb</font>",
+            "<b>Assignment I - training copy</b> "
+            "(<font face='Courier'>legacy/assignment1_prepare_data.py</font>)",
+            "body",
+        ),
+        code(
+            "df['LoanToIncomeRatio'] = df['LoanAmount'] / (df['AnnualIncome'] + 1)\n"
+            "df['SavingsToLoanRatio'] = df['SavingsAccountBalance'] / "
+            "(df['LoanAmount'] + 1)"
+        ),
+        para(
+            "<b>Assignment I - serving copy</b> "
+            "(<font face='Courier'>legacy/assignment1_serving_pipeline.py</font>). "
+            "The same two formulas retyped, plus a 22-element positional vector "
+            "whose order must match the config by hand:",
+            "body",
+        ),
+        code(
+            "def extract_features(app_input: LoanApplicationInput) -> tuple:\n"
+            "    # Derived features\n"
+            "    loan_to_income_ratio = app_input.loan_amount / "
+            "(app_input.annual_income + 1)\n"
+            "    savings_to_loan_ratio = app_input.savings_account_balance / "
+            "(app_input.loan_amount + 1)\n"
+            "\n"
+            "    feature_vector = pd.DataFrame([[\n"
+            "        app_input.age,\n"
+            "        app_input.annual_income,\n"
+            "        ...                        # 22 values, positional\n"
+            "        loan_to_income_ratio,\n"
+            "        savings_to_loan_ratio,\n"
+            "    ]], columns=settings.FEATURES)    # labelled by position"
+        ),
+        para(
+            "<b>Assignment II</b> - "
+            "<font face='Courier'>src/loan_risk/features/engineering.py</font>",
             "body",
         ),
         code(
@@ -898,13 +947,15 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
     ]
 
     # ---------------- 4. linting ----------------
-    before_lines = [ln for ln in art["before_flake8"].splitlines() if ln.strip()]
-    before_data = [
+    # 01_before_flake8.txt already merges the src/scripts/tests and data
+    # findings; its leading comment block explains provenance and must not be
+    # counted as violations.
+    before_lines = [
         ln
-        for ln in art["before_flake8_data"].splitlines()
+        for ln in art["before_flake8"].splitlines()
         if ln.strip() and not ln.startswith("#")
     ]
-    before_total = len(before_lines) + len(before_data)
+    before_total = len(before_lines)
     story += [
         para("4. Code Formatting and Linting", "h2"),
         para(
@@ -922,19 +973,31 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
         ),
         para("Method", "h3"),
         para(
-            f"The <b>before</b> snapshot was taken on the codebase as first "
-            f"written, together with the untouched research code in "
-            f"<font face='Courier'>legacy/</font>. It reported "
-            f"<b>{before_total} flake8 violations</b> across the tree and "
-            "<b>15 files</b> that black would reformat. The formatters were "
-            "then run, and the two findings the formatters cannot fix were "
-            "repaired by hand — one of which was a genuine design issue "
+            "The <b>before</b> snapshot was taken on the codebase as first "
+            "written, across the shipping tree only: "
+            "<font face='Courier'>src/</font>, "
+            "<font face='Courier'>scripts/</font>, "
+            "<font face='Courier'>tests/</font> and "
+            "<font face='Courier'>data/</font>. It reported "
+            f"<b>{before_total} flake8 violations</b> and <b>15 files</b> that "
+            "black would reformat. The formatters were then run, and the two "
+            "findings they cannot fix were repaired by hand -- one of which "
+            "was a genuine design issue "
             "(<font face='Courier'>C901</font>: "
             "<font face='Courier'>DataValidator.validate</font> had a "
-            "cyclomatic complexity of 11 against a budget of 10, and was split "
-            "into <font face='Courier'>_check_column</font> and "
-            "<font face='Courier'>_check_range</font>). Both reports are stored "
-            "verbatim in <font face='Courier'>reports/lint/</font>."
+            "cyclomatic complexity of 11 against a budget of 10, and was "
+            "split into <font face='Courier'>_check_column</font> and "
+            "<font face='Courier'>_check_range</font>)."
+        ),
+        para(
+            "<b>A note on how this number is counted.</b> An earlier capture "
+            "put the before-figure at 59 by also counting 41 findings inside "
+            "an exploratory file that was excluded from the formatters by "
+            "design. Counting a file kept deliberately unformatted inflates "
+            "the improvement, so it is excluded here and the file has since "
+            "been removed from the repository. The figure quoted is shipping "
+            "code only.",
+            "body",
         ),
         table(
             [
@@ -1424,7 +1487,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
                     "MQ-1",
                     "Accuracy",
                     "Headline decision correctness",
-                    "≥ 0.80",
+                    f"≥ {gates['min_accuracy']}",
                     f"<b>{mq['accuracy']:.4f}</b>",
                     "PASS",
                 ],
@@ -1433,7 +1496,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
                     "F1 score",
                     "Balances the cost of a missed good customer against an "
                     "approved bad one under class imbalance",
-                    "≥ 0.80",
+                    f"≥ {gates['min_f1']}",
                     f"<b>{mq['f1']:.4f}</b>",
                     "PASS",
                 ],
@@ -1442,7 +1505,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
                     "ROC-AUC",
                     "Threshold-independent ranking quality; survives a change to "
                     "the 0.50 cut-off",
-                    "≥ 0.85",
+                    f"≥ {gates['min_roc_auc']}",
                     f"<b>{mq['roc_auc']:.4f}</b>",
                     "PASS",
                 ],
@@ -1451,7 +1514,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
                     "Brier score",
                     "<b>Calibration.</b> The risk tier is derived from the "
                     "probability, so the probability itself must be truthful",
-                    "≤ 0.15",
+                    f"≤ {gates['max_brier_score']}",
                     f"<b>{mq['brier_score']:.4f}</b>",
                     "PASS",
                 ],
@@ -1513,6 +1576,51 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             "<font face='Courier'>ModelTrainer.compare_algorithms()</font> on "
             "ROC-AUC — the choice is code, not a comment.",
             "caption",
+        ),
+        para("Limitation: what these numbers do and do not establish", "h3"),
+        para(
+            "<b>The dataset is synthetic, and that bounds what the metrics above "
+            "can be taken to mean.</b> The original Kaggle "
+            "&quot;Financial Risk for Loan Approval&quot; file is licensed and "
+            "not redistributed, so "
+            "<font face='Courier'>data/generate_synthetic_data.py</font> produces "
+            "a schema-faithful stand-in. Its label is generated by an explicit "
+            "logistic expression:",
+            "body",
+        ),
+        code(
+            "z = 1.1*(credit_score-660)/90 - 1.8*dti - 1.4*cc_util\n"
+            "    - 1.0*prev_defaults - 0.9*bankruptcy + 0.7*income_z\n"
+            "    + 0.4*payment_history\n"
+            "    + 2.2*sweet_spot - 2.4*either_bad - 2.0*double_hit\n"
+            "    - 1.6*over_leveraged + N(0, 0.45)\n"
+            "LoanApproved = (sigmoid(z) > 0.5)"
+        ),
+        para(
+            "Eight of the 22 model features appear in that expression -- seven "
+            "directly, and <font face='Courier'>LoanToIncomeRatio</font> through "
+            "the <font face='Courier'>over_leveraged</font> threshold -- with "
+            "only N(0, 0.45) of irreducible noise. The Random Forest is therefore "
+            "recovering a smooth function of its own inputs, which it does well. "
+            "That the logistic baseline also reaches 0.9686 ROC-AUC is the "
+            "clearest evidence of this: both models are approximating a "
+            "near-logistic generating process, not discovering credit risk.",
+            "body",
+        ),
+        para(
+            "So the honest reading of Figure 12 is: <b>these metrics validate the "
+            "pipeline, not the domain.</b> They demonstrate that ingestion, "
+            "feature engineering, training, calibration, gating and serving are "
+            "wired together correctly and measured correctly -- which is what "
+            "Assignment II asks us to build. They are <i>not</i> evidence that "
+            "this model would price real credit risk at 94.8% accuracy, and we do "
+            "not claim it. Establishing that needs the licensed dataset, which "
+            "drops in as <font face='Courier'>data/Loan.csv</font> with no code "
+            "change: every figure in this report regenerates from the four "
+            "commands in Appendix B. The same caveat applies to the calibration "
+            "curve -- the probabilities are well calibrated <i>to a formula we "
+            "wrote</i>.",
+            "body",
         ),
         para("8.2 Data quality — four metrics", "h3"),
         para(
@@ -1807,10 +1915,12 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             "| data | ml\n"
             "├── scripts/                       # train, evaluate, render "
             "evidence, build report\n"
-            "├── notebooks/research_prototype.ipynb   # RESEARCH CODE "
-            "(evidence)\n"
-            "├── legacy/research_feature_prototype.py # same, exported for the "
-            "linters\n"
+            "├── legacy/                        # ASSIGNMENT I CODE, verbatim "
+            "(Section 2)\n"
+            "│   ├── assignment1_serving_pipeline.py  # the serving copy of the "
+            "ratios\n"
+            "│   └── assignment1_prepare_data.py      # the training copy of the "
+            "same\n"
             "├── reports/{lint,metrics,figures}/      # all captured evidence\n"
             "└── artifacts/model.joblib               # serialised pipeline"
         ),

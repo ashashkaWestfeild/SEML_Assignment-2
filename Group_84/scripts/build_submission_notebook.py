@@ -141,23 +141,40 @@ print(FEATURE_ORDER)
 The component compared is **feature engineering**. Both artefacts are in the
 repository:
 
-* **Research** — `notebooks/research_prototype.ipynb` (exported verbatim as
-  `legacy/research_feature_prototype.py`)
+* **Research** — **Group 84's own Assignment I submission, verbatim**:
+  `legacy/assignment1_serving_pipeline.py` and `legacy/assignment1_prepare_data.py`
 * **Production** — `src/loan_risk/features/engineering.py`
 
-The research code is not a strawman: it answered the question it was written
-for. Each of its shortcuts becomes a defect only once the code must run
-unattended — and each has a specific engineered answer.
+The 'research' half is not an example written for this report. It is code that
+actually shipped, which is what gives the comparison evidential weight — a foil
+authored alongside the improved version proves nothing, because its faults were
+chosen by the same person who then fixed them.
+
+Assignment I was working software that earned its marks. Its central defect is
+visible below: **the two ratio formulas are written twice**, once in
+`prepare_data.py` for training and once in `extract_features()` for serving.
+Two copies of one definition is textbook training/serving skew.
 """,
     ),
     (
         "code",
         """\
-research = (PROJECT_ROOT / "legacy" / "research_feature_prototype.py").read_text(encoding="utf-8")
+# The two Assignment I copies of the same formula, side by side.
+train_copy = (PROJECT_ROOT / "legacy" / "assignment1_prepare_data.py").read_text(encoding="utf-8")
+serve_copy = (PROJECT_ROOT / "legacy" / "assignment1_serving_pipeline.py").read_text(encoding="utf-8")
+
 print("=" * 78)
-print("RESEARCH CODE (excerpt) — legacy/research_feature_prototype.py")
+print("ASSIGNMENT I - TRAINING copy (legacy/assignment1_prepare_data.py)")
 print("=" * 78)
-print("\\n".join(research.splitlines()[14:24]))
+print("\\n".join(l for l in train_copy.splitlines() if "Ratio'] =" in l))
+
+print()
+print("=" * 78)
+print("ASSIGNMENT I - SERVING copy (legacy/assignment1_serving_pipeline.py)")
+print("=" * 78)
+print("\\n".join(l for l in serve_copy.splitlines() if "_ratio =" in l))
+print()
+print("-> the same two formulas, maintained in two places")
 """,
     ),
     (
@@ -656,6 +673,27 @@ pd.DataFrame(training["algorithm_comparison"]).T[
     (
         "markdown",
         """\
+### Limitation: what these numbers do and do not establish
+
+**The dataset is synthetic, and that bounds what the metrics above mean.** The
+licensed Kaggle file is not redistributed, so `data/generate_synthetic_data.py`
+produces a schema-faithful stand-in whose label is an explicit logistic
+expression. **Eight of the 22 model features appear in it** — seven directly,
+plus `LoanToIncomeRatio` via the `over_leveraged` threshold — with only
+N(0, 0.45) noise.
+
+The forest is therefore recovering a smooth function of its own inputs. That the
+logistic baseline also reaches 0.9686 ROC-AUC is the clearest sign of it: both
+models approximate a near-logistic generating process rather than discovering
+credit risk.
+
+So the honest reading is that **these metrics validate the pipeline, not the
+domain**. They show ingestion, feature engineering, training, calibration,
+gating and serving are wired together and measured correctly — which is what
+Assignment II asks for. They are *not* evidence that this model prices real
+credit risk at 94.8% accuracy, and we do not claim it. The licensed dataset
+drops in as `data/Loan.csv` with no code change and every figure regenerates.
+
 ### 8.2 Data quality — four metrics
 
 In an ML system the data is a dependency exactly as a library is, so it needs
@@ -803,7 +841,7 @@ profile are deployment assets, not public ones — belongs in the same list.
 | Task | Deliverable | Evidence |
 |:--|:--|:--|
 | 1. Refactor (OOP / FP) | `src/loan_risk/` — 11 modules, one responsibility each | Section 1 |
-| 2. Research vs production | `notebooks/research_prototype.ipynb` vs `features/engineering.py` | Section 2 |
+| 2. Research vs production | Assignment I's shipped code (`legacy/`) vs `features/engineering.py` | Section 2 |
 | 3. Error handling & logging | Typed exceptions + JSON logging across 3 critical functions | Section 3 |
 | 4. Formatting & linting | flake8 59 → 0, black/isort clean, pylint 9.72 → 10.00 | Section 4, `reports/lint/` |
 | 5. REST API | FastAPI, versioned paths, 5 status codes, bounded batch | Section 5 |
