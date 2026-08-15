@@ -578,18 +578,23 @@ print(f"  loan > 5x income      -> {r3.status_code} (Business rule rejection)")
 
 ## Task 6: Test Types Implemented
 
-We implemented **2 types of tests** for our ML system using the `pytest` framework, as required by the assignment:
+The assignment asks for at least 2 test types. We implemented **4**, separated
+by `pytest` markers so each layer can be run independently in CI:
 
-| Test Type | File | No. of Tests | What it validates |
-|:--|:--|:--:|:--|
-| **Unit Tests** | `tests/test_unit_features.py` | 5 | Individual pure functions and the FeatureEngineer transformer class in isolation (no I/O, no model, no HTTP) |
-| **Integration Tests** | `tests/test_integration_api.py` | 5 | Full HTTP request-response cycle through all components wired together (FastAPI -> Pydantic -> Predictor -> Model -> Response) |
+| Test Type | Marker | File | No. of Tests | What it validates |
+|:--|:--|:--|:--:|:--|
+| **Unit** | `unit` | `tests/test_unit_features.py` | 5 | Pure functions and the FeatureEngineer transformer in isolation (no I/O, no model, no HTTP) |
+| **Integration** | `integration` | `tests/test_integration_api.py` | 25 | The full HTTP cycle with all components wired together (FastAPI -> Pydantic -> Predictor -> Model -> Response), including the batch endpoint and the security boundary |
+| **Data validation** | `data` | `tests/test_data_validation.py` | 20 | The data contract: schema conformance, missing values, PSI/KS drift, and the ingestion failure modes |
+| **ML behavioural** | `ml` | `tests/test_model_training.py`, `tests/test_model_inference.py` | 16 | That learning actually happened, and that inference obeys the domain's shape, range, directional and invariance expectations |
 
-**Total: 10 tests across 2 test files + 1 shared fixture file.**
+**Total: 66 tests across 5 test files + 1 shared fixture file, at 86% line coverage.**
 
-The rationale for choosing these two types:
-- **Unit tests** form the base of the testing pyramid. They run in milliseconds and give precise, localized failure signals when a function's contract is broken.
-- **Integration tests** sit at the top of the pyramid. They verify that all components (API routing, schema validation, model registry, feature engineering, inference) work correctly when wired together through the real HTTP surface.
+The rationale for the layering:
+- **Unit tests** form the base of the pyramid. They run in milliseconds and give precise, localized failure signals when a function's contract is broken.
+- **Integration tests** sit at the top. They verify that the components work together through the real HTTP surface, which a unit test cannot show.
+- **Data-validation tests** exist because in an ML system the data is a dependency exactly as a library is, so it needs its own regression suite.
+- **ML behavioural tests** exist because a model that trains without raising is not a model that has learned; these assert on learning and on domain expectations rather than on code paths.
 
 Below are the complete source files:
 """,
@@ -647,8 +652,7 @@ Integration tests exercise **multiple components working together** through the 
 # Execute the complete test suite (unit + integration) and display results
 result = subprocess.run(
     [sys.executable, "-m", "pytest",
-     "tests/test_unit_features.py", "tests/test_integration_api.py",
-     "-v", "-o", "addopts=", "-p", "no:cacheprovider", "--color=no"],
+     "tests", "-o", "addopts=", "-p", "no:cacheprovider", "--color=no", "-q"],
     cwd=PROJECT_ROOT, capture_output=True, text=True,
 )
 output = result.stdout.strip() or result.stderr.strip()
