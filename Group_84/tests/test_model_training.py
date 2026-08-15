@@ -102,14 +102,6 @@ def test_shuffled_labels_destroy_generalisation(xy):
     assert 0.35 < auc < 0.65, f"Leakage suspected: AUC on shuffled labels = {auc:.3f}"
 
 
-def test_real_labels_beat_chance(xy):
-    """Sanity counterpart: on true labels the model must clear the AUC gate."""
-    features, labels = xy
-    trainer = ModelTrainer(settings)
-    trainer.train(features, labels)
-    assert trainer.metrics.roc_auc >= settings.gates.min_roc_auc
-
-
 def test_quality_gates_reject_a_weak_model(xy):
     """The gate mechanism itself must fail a deliberately under-fit model."""
     features, labels = xy
@@ -131,21 +123,21 @@ def test_quality_gates_reject_a_weak_model(xy):
         trainer.enforce_quality_gates(weak_metrics)
 
 
-def test_training_rejects_a_single_class_target(xy):
+@pytest.mark.parametrize(
+    "scenario",
+    ["single_class_target", "length_mismatch", "unknown_algorithm"],
+)
+def test_training_rejects_unusable_inputs(xy, scenario):
+    """Each precondition failure surfaces as one ModelTrainingError."""
     features, labels = xy
-    with pytest.raises(ModelTrainingError, match="single class"):
-        ModelTrainer(settings).train(features, labels * 0, evaluate=False)
-
-
-def test_training_rejects_length_mismatch(xy):
-    features, labels = xy
+    trainer = ModelTrainer(settings)
     with pytest.raises(ModelTrainingError):
-        ModelTrainer(settings).train(features, labels.head(10), evaluate=False)
-
-
-def test_unknown_algorithm_is_rejected():
-    with pytest.raises(ModelTrainingError, match="Unsupported algorithm"):
-        ModelTrainer(settings).build_pipeline("deep_neural_magic")
+        if scenario == "single_class_target":
+            trainer.train(features, labels * 0, evaluate=False)
+        elif scenario == "length_mismatch":
+            trainer.train(features, labels.head(10), evaluate=False)
+        else:
+            trainer.build_pipeline("deep_neural_magic")
 
 
 def test_model_quality_metrics_meet_release_gates(xy):

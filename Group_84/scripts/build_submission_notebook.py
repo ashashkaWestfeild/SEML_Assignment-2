@@ -182,7 +182,7 @@ comparison = pd.DataFrame([
     ("Unguarded division", "inf / ZeroDivisionError", "safe_ratio() +1 smoothing + finiteness check"),
     ("Feature list retyped", "Training/serving skew", "One FEATURE_ORDER contract, re-imposed on transform"),
     ("except: pass", "Silent failures", "Typed exceptions; every handler logs and re-raises"),
-    ("No logging / types / tests", "Nothing observable or verifiable", "JSON logging, type hints, 89 tests"),
+    ("No logging / types / tests", "Nothing observable or verifiable", "JSON logging, type hints, 80 tests"),
     ("Logic in notebook cells", "Cannot be imported or tested", "Importable package"),
 ], columns=["Research code", "Consequence in production", "Production answer"])
 comparison.index += 1
@@ -419,7 +419,7 @@ pd.DataFrame(rows, columns=["Scenario", "Expected", "Actual", "Result"])
 
 ## 6. Test Types Implemented
 
-89 tests across four distinct types, tagged with pytest markers so each layer
+80 tests across four distinct types, tagged with pytest markers so each layer
 can run independently in CI.
 """,
     ),
@@ -807,7 +807,7 @@ profile are deployment assets, not public ones — belongs in the same list.
 | 3. Error handling & logging | Typed exceptions + JSON logging across 3 critical functions | Section 3 |
 | 4. Formatting & linting | flake8 59 → 0, black/isort clean, pylint 9.72 → 10.00 | Section 4, `reports/lint/` |
 | 5. REST API | FastAPI, versioned paths, 5 status codes, bounded batch | Section 5 |
-| 6. Two+ test types | 4 types, 89 tests, 93% line coverage | Section 6 |
+| 6. Two+ test types | 4 types, 80 tests, 93% line coverage | Section 6 |
 | 7. ML tests | Overfit-batch, loss-decreases, shape/range, directional, invariance | Section 7 |
 | 8. Metrics | 4 model-quality + 4 data-quality, all gated | Section 8 |
 | 9. Production testing & security | Shadow → canary → A/B holdout; input-boundary controls | Section 9 |

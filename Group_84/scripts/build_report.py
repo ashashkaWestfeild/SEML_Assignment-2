@@ -1803,7 +1803,7 @@ def build_story(art: Dict[str, Any]) -> List[Any]:
             "│   ├── models/predictor.py        # ModelRegistry + RiskPredictor\n"
             "│   ├── monitoring/drift.py        # DriftMonitor   -> DQ-3, DQ-4\n"
             "│   └── api/{schemas,app}.py       # FastAPI contract and routes\n"
-            "├── tests/                         # 89 tests: unit | integration "
+            f"├── tests/                    # {len(tests)} tests: unit | integration "
             "| data | ml\n"
             "├── scripts/                       # train, evaluate, render "
             "evidence, build report\n"

@@ -4,13 +4,13 @@ rootdir: C:\Users\singh\OneDrive\Documents\BITS WILP\Sem 2\SEML\SEML Assignment 
 configfile: pyproject.toml
 plugins: anyio-4.12.0, langsmith-0.8.15, asyncio-1.4.0, cov-7.1.0
 asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
-collected 89 items
+collected 80 items
 
-tests\test_data_validation.py ....................                       [ 22%]
-tests\test_integration_api.py .....................                      [ 46%]
-tests\test_model_inference.py .......................                    [ 71%]
-tests\test_model_training.py ...........                                 [ 84%]
-tests\test_unit_features.py ..............                               [100%]
+tests\test_data_validation.py ...................                        [ 23%]
+tests\test_integration_api.py .....................                      [ 50%]
+tests\test_model_inference.py .....................                      [ 76%]
+tests\test_model_training.py ..........                                  [ 88%]
+tests\test_unit_features.py .........                                    [100%]
 
 ============================== warnings summary ===============================
 tests/test_integration_api.py::test_health_endpoint_reports_a_loaded_model
@@ -18,4 +18,4 @@ tests/test_integration_api.py::test_health_endpoint_reports_a_loaded_model
     from starlette.testclient import TestClient as TestClient  # noqa
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================= 89 passed, 1 warning in 23.93s ========================
+======================= 80 passed, 1 warning in 20.71s ========================

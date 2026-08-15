@@ -4,6 +4,9 @@ These exercise several components together through the real HTTP surface:
 FastAPI routing -> Pydantic validation -> ModelRegistry -> RiskPredictor ->
 FeatureEngineer -> estimator -> response serialisation. A unit test proves a
 part works; these prove the parts were wired together correctly.
+
+The status-code contract is parametrised: one test covering every way a
+request can be rejected reads better than five near-identical functions.
 """
 
 from __future__ import annotations
@@ -65,33 +68,33 @@ def test_batch_predict_returns_one_result_per_application(api_client, valid_appl
 
 
 # ── status-code contract ─────────────────────────────────────────────────
-def test_schema_violation_returns_422(api_client, valid_application):
-    """Out-of-range values are rejected at the edge, before the model runs."""
-    response = api_client.post(
-        "/v1/predict", json={**valid_application, "credit_score": 1500}
-    )
-    assert response.status_code == 422
-
-
-def test_missing_required_field_returns_422(api_client, valid_application):
-    incomplete = dict(valid_application)
+def _without_credit_score(application):
+    incomplete = dict(application)
     del incomplete["credit_score"]
-    assert api_client.post("/v1/predict", json=incomplete).status_code == 422
+    return incomplete
 
 
-def test_unknown_field_returns_422(api_client, valid_application):
-    """extra='forbid' turns a client typo into a loud error, not a silent one."""
-    response = api_client.post(
-        "/v1/predict", json={**valid_application, "credit_scr": 700}
-    )
-    assert response.status_code == 422
-
-
-def test_wrong_type_returns_422(api_client, valid_application):
-    response = api_client.post(
-        "/v1/predict", json={**valid_application, "annual_income": "one hundred k"}
-    )
-    assert response.status_code == 422
+@pytest.mark.parametrize(
+    "mutate,reason",
+    [
+        (lambda a: {**a, "credit_score": 1500}, "value above the declared maximum"),
+        (_without_credit_score, "required field absent"),
+        (lambda a: {**a, "credit_scr": 700}, "unknown key (extra='forbid')"),
+        (lambda a: {**a, "annual_income": "one hundred k"}, "wrong type"),
+        (lambda a: {**a, "annual_income": 10**15}, "absurd magnitude"),
+        (lambda a: {**a, "credit_score": "'; DROP TABLE applications;--"}, "sql"),
+        (lambda a: {**a, "credit_score": "<script>alert(1)</script>"}, "xss"),
+        (lambda a: {**a, "credit_score": "../../etc/passwd"}, "path traversal"),
+        (lambda a: {**a, "credit_score": {"$ne": None}}, "nosql operator"),
+        (lambda a: {**a, "credit_score": [1, 2, 3]}, "array where scalar expected"),
+    ],
+)
+def test_malformed_and_adversarial_payloads_are_rejected_with_422(
+    api_client, valid_application, mutate, reason
+):
+    """Nothing malformed reaches the model: Pydantic rejects it at the edge."""
+    response = api_client.post("/v1/predict", json=mutate(valid_application))
+    assert response.status_code == 422, reason
 
 
 def test_business_rule_violation_returns_400(api_client, valid_application):
@@ -106,48 +109,15 @@ def test_business_rule_violation_returns_400(api_client, valid_application):
     assert response.json()["error_type"] == "BusinessRuleViolation"
 
 
-def test_oversized_batch_returns_422(api_client, valid_application):
-    """The batch cap is a denial-of-service control and must be enforced."""
-    payload = {"applications": [valid_application] * 101}
+@pytest.mark.parametrize("n_applications", [0, 101])
+def test_batch_size_limits_are_enforced(api_client, valid_application, n_applications):
+    """The 1-100 cap is a denial-of-service control, not just ergonomics."""
+    payload = {"applications": [valid_application] * n_applications}
     assert api_client.post("/v1/predict/batch", json=payload).status_code == 422
-
-
-def test_empty_batch_returns_422(api_client):
-    assert (
-        api_client.post("/v1/predict/batch", json={"applications": []}).status_code == 422
-    )
 
 
 def test_unknown_route_returns_404(api_client):
     assert api_client.get("/v1/does-not-exist").status_code == 404
-
-
-# ── security-relevant input handling ─────────────────────────────────────
-@pytest.mark.parametrize(
-    "malicious",
-    [
-        "'; DROP TABLE applications;--",
-        "<script>alert(1)</script>",
-        "../../etc/passwd",
-        {"$ne": None},
-        [1, 2, 3],
-    ],
-)
-def test_adversarial_payloads_are_rejected_at_the_boundary(
-    api_client, valid_application, malicious
-):
-    """Injection strings never reach the model: Pydantic rejects them with 422."""
-    response = api_client.post(
-        "/v1/predict", json={**valid_application, "credit_score": malicious}
-    )
-    assert response.status_code == 422
-
-
-def test_extreme_numeric_values_are_rejected(api_client, valid_application):
-    response = api_client.post(
-        "/v1/predict", json={**valid_application, "annual_income": 10**15}
-    )
-    assert response.status_code == 422
 
 
 def test_error_responses_never_leak_internals(api_client, valid_application):

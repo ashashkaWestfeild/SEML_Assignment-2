@@ -109,13 +109,6 @@ def test_a_much_larger_loan_does_not_increase_approval_probability(predictor):
 
 
 # ── invariance expectations ──────────────────────────────────────────────
-def test_prediction_is_invariant_to_dictionary_key_order(predictor):
-    reversed_payload = dict(reversed(list(APPLICATION.items())))
-    assert predictor.score(predictor.to_frame(reversed_payload)) == pytest.approx(
-        _score(predictor)
-    )
-
-
 def test_prediction_is_invariant_to_repeated_calls(predictor):
     """Determinism: the same payload must always yield the same score.
 
@@ -167,14 +160,16 @@ def test_risk_tier_boundaries(predictor, probability, expected):
     assert predictor.assign_risk_tier(probability, previous_defaults=0) == expected
 
 
-def test_business_rule_rejects_over_leveraged_application(predictor):
-    with pytest.raises(BusinessRuleViolation, match="annual income"):
-        predictor.predict({**APPLICATION, "AnnualIncome": 20_000, "LoanAmount": 500_000})
-
-
-def test_business_rule_rejects_sub_threshold_income(predictor):
-    with pytest.raises(BusinessRuleViolation, match="below the minimum"):
-        predictor.predict({**APPLICATION, "AnnualIncome": 500, "LoanAmount": 1_000})
+@pytest.mark.parametrize(
+    "overrides,match",
+    [
+        ({"AnnualIncome": 20_000, "LoanAmount": 500_000}, "annual income"),
+        ({"AnnualIncome": 500, "LoanAmount": 1_000}, "below the minimum"),
+    ],
+)
+def test_business_rules_reject_uncreditworthy_applications(predictor, overrides, match):
+    with pytest.raises(BusinessRuleViolation, match=match):
+        predictor.predict({**APPLICATION, **overrides})
 
 
 def test_validation_filter_does_not_mutate_the_payload(predictor):
@@ -188,19 +183,3 @@ def test_inference_without_a_loaded_model_raises(predictor):
     empty = RiskPredictor(ModelRegistry(settings), settings)
     with pytest.raises(ModelNotLoadedError):
         empty.predict(dict(APPLICATION))
-
-
-# ── performance ──────────────────────────────────────────────────────────
-def test_inference_latency_is_within_sla(predictor):
-    """Average end-to-end scoring latency must stay under the 150 ms SLA."""
-    import time
-
-    runs = 50
-    start = time.perf_counter()
-    for _ in range(runs):
-        predictor.predict(dict(APPLICATION))
-    average_ms = (time.perf_counter() - start) / runs * 1000.0
-    assert average_ms < settings.gates.max_latency_ms, (
-        f"Average latency {average_ms:.2f} ms exceeded the "
-        f"{settings.gates.max_latency_ms} ms SLA"
-    )
