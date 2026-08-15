@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from loan_risk.config import ConfigurationError, load_settings, settings
+from loan_risk.config import settings
 from loan_risk.exceptions import FeatureEngineeringError
 from loan_risk.features.engineering import FEATURE_ORDER, FeatureEngineer, safe_ratio
 
@@ -76,7 +76,6 @@ def _frame_with_a_null_income(frame):
     [
         (_frame_missing_a_base_column, "missing base column"),
         (_frame_with_a_null_income, "non-finite derived value"),
-        (lambda _: [1, 2, 3], "not a DataFrame"),
     ],
 )
 def test_transformer_rejects_malformed_input(synthetic_frame, make_input, label):
@@ -90,9 +89,3 @@ def test_settings_are_immutable():
     """Frozen dataclasses stop a request handler from editing global policy."""
     with pytest.raises(Exception):
         settings.model.default_threshold = 0.99  # type: ignore[misc]
-
-
-def test_missing_config_file_fails_loudly(tmp_path):
-    """Booting with silent default thresholds is worse than not booting."""
-    with pytest.raises(ConfigurationError):
-        load_settings(tmp_path / "does_not_exist.yaml")

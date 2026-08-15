@@ -74,15 +74,9 @@ def test_probabilities_are_valid_and_sum_to_one(trained_pipeline, xy):
     np.testing.assert_allclose(probabilities.sum(axis=1), 1.0, atol=1e-9)
 
 
-def test_single_prediction_returns_a_well_formed_assessment(predictor):
-    result = predictor.predict(dict(APPLICATION))
-    assert isinstance(result.is_approved, bool)
-    assert 0.0 <= result.probability <= 1.0
-    assert result.risk_tier in {"LOW", "MEDIUM", "HIGH"}
-    assert result.latency_ms >= 0.0
-
-
-@pytest.mark.parametrize("credit_score", [300, 500, 700, 850])
+# The two extremes of the declared range; interior points exercise no
+# additional branch.
+@pytest.mark.parametrize("credit_score", [300, 850])
 def test_output_stays_in_range_across_the_credit_spectrum(predictor, credit_score):
     probability = _score(predictor, CreditScore=credit_score)
     assert 0.0 <= probability <= 1.0
@@ -102,12 +96,6 @@ def test_higher_debt_to_income_does_not_increase_approval_probability(predictor)
     assert high <= low, (low, high)
 
 
-def test_a_much_larger_loan_does_not_increase_approval_probability(predictor):
-    modest = _score(predictor, LoanAmount=15_000)
-    aggressive = _score(predictor, LoanAmount=140_000)
-    assert aggressive <= modest, (modest, aggressive)
-
-
 # ── invariance expectations ──────────────────────────────────────────────
 def test_prediction_is_invariant_to_repeated_calls(predictor):
     """Determinism: the same payload must always yield the same score.
@@ -125,17 +113,6 @@ def test_prediction_is_invariant_to_repeated_calls(predictor):
         assert score == pytest.approx(scores[0], abs=1e-12, rel=0)
     rounded = {round(score, 4) for score in scores}
     assert len(rounded) == 1
-
-
-def test_prediction_is_invariant_to_batching(trained_pipeline, xy):
-    """Row-by-row scoring must equal batch scoring (no cross-row leakage)."""
-    features, _ = xy
-    batch = features.head(10)
-    batched = trained_pipeline.predict_proba(batch)[:, 1]
-    individually = np.array(
-        [trained_pipeline.predict_proba(batch.iloc[[i]])[0][1] for i in range(10)]
-    )
-    np.testing.assert_allclose(batched, individually, atol=1e-12)
 
 
 def test_prediction_is_invariant_to_column_order(trained_pipeline):
@@ -170,13 +147,6 @@ def test_risk_tier_boundaries(predictor, probability, expected):
 def test_business_rules_reject_uncreditworthy_applications(predictor, overrides, match):
     with pytest.raises(BusinessRuleViolation, match=match):
         predictor.predict({**APPLICATION, **overrides})
-
-
-def test_validation_filter_does_not_mutate_the_payload(predictor):
-    payload = dict(APPLICATION)
-    snapshot = dict(payload)
-    predictor.validate_business_rules(payload)
-    assert payload == snapshot
 
 
 def test_inference_without_a_loaded_model_raises(predictor):

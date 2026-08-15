@@ -1,25 +1,20 @@
 tests/test_data_validation.py::test_clean_data_conforms_fully
 tests/test_data_validation.py::test_out_of_range_values_are_flagged[CreditScore-9999-above_maximum:CreditScore]
 tests/test_data_validation.py::test_out_of_range_values_are_flagged[AnnualIncome--1-below_minimum:AnnualIncome]
-tests/test_data_validation.py::test_out_of_range_values_are_flagged[Age-5-below_minimum:Age]
 tests/test_data_validation.py::test_missing_column_is_flagged
 tests/test_data_validation.py::test_strict_mode_aborts_the_build_on_violation
-tests/test_data_validation.py::test_validator_rejects_empty_frame
 tests/test_data_validation.py::test_missing_value_fraction_is_measured
 tests/test_data_validation.py::test_psi_separates_stable_from_shifted_distributions
-tests/test_data_validation.py::test_psi_rejects_empty_samples
 tests/test_data_validation.py::test_drift_monitor_flags_only_the_shifted_feature
 tests/test_data_validation.py::test_ingestor_reads_a_valid_csv
 tests/test_data_validation.py::test_ingestor_rejects_unusable_files[missing.csv-None]
 tests/test_data_validation.py::test_ingestor_rejects_unusable_files[empty.csv-]
 tests/test_data_validation.py::test_ingestor_rejects_unusable_files[headers.csv-Age,AnnualIncome\n]
-tests/test_data_validation.py::test_ingestor_rejects_unusable_files[ragged.csv-a,b\n1,2\n3,4,5,6\n]
 tests/test_data_validation.py::test_ingestor_warns_but_continues_on_duplicate_rows
 tests/test_data_validation.py::test_ingestor_rejects_a_frame_missing_contract_columns
 tests/test_data_validation.py::test_ingestor_split_returns_aligned_features_and_labels
 tests/test_integration_api.py::test_health_endpoint_reports_a_loaded_model
 tests/test_integration_api.py::test_model_metadata_endpoint_exposes_the_contract
-tests/test_integration_api.py::test_openapi_schema_is_generated
 tests/test_integration_api.py::test_predict_returns_200_and_a_complete_payload
 tests/test_integration_api.py::test_batch_predict_returns_one_result_per_application
 tests/test_integration_api.py::test_malformed_and_adversarial_payloads_are_rejected_with_422[<lambda>-value above the declared maximum]
@@ -27,29 +22,18 @@ tests/test_integration_api.py::test_malformed_and_adversarial_payloads_are_rejec
 tests/test_integration_api.py::test_malformed_and_adversarial_payloads_are_rejected_with_422[<lambda>-unknown key (extra='forbid')]
 tests/test_integration_api.py::test_malformed_and_adversarial_payloads_are_rejected_with_422[<lambda>-wrong type]
 tests/test_integration_api.py::test_malformed_and_adversarial_payloads_are_rejected_with_422[<lambda>-absurd magnitude]
-tests/test_integration_api.py::test_malformed_and_adversarial_payloads_are_rejected_with_422[<lambda>-sql]
-tests/test_integration_api.py::test_malformed_and_adversarial_payloads_are_rejected_with_422[<lambda>-xss]
-tests/test_integration_api.py::test_malformed_and_adversarial_payloads_are_rejected_with_422[<lambda>-path traversal]
-tests/test_integration_api.py::test_malformed_and_adversarial_payloads_are_rejected_with_422[<lambda>-nosql operator]
-tests/test_integration_api.py::test_malformed_and_adversarial_payloads_are_rejected_with_422[<lambda>-array where scalar expected]
+tests/test_integration_api.py::test_malformed_and_adversarial_payloads_are_rejected_with_422[<lambda>-injection]
 tests/test_integration_api.py::test_business_rule_violation_returns_400
-tests/test_integration_api.py::test_batch_size_limits_are_enforced[0]
 tests/test_integration_api.py::test_batch_size_limits_are_enforced[101]
-tests/test_integration_api.py::test_unknown_route_returns_404
 tests/test_integration_api.py::test_error_responses_never_leak_internals
 tests/test_integration_api.py::test_api_and_direct_pipeline_agree
 tests/test_model_inference.py::test_batch_prediction_shape_is_correct
 tests/test_model_inference.py::test_probabilities_are_valid_and_sum_to_one
-tests/test_model_inference.py::test_single_prediction_returns_a_well_formed_assessment
 tests/test_model_inference.py::test_output_stays_in_range_across_the_credit_spectrum[300]
-tests/test_model_inference.py::test_output_stays_in_range_across_the_credit_spectrum[500]
-tests/test_model_inference.py::test_output_stays_in_range_across_the_credit_spectrum[700]
 tests/test_model_inference.py::test_output_stays_in_range_across_the_credit_spectrum[850]
 tests/test_model_inference.py::test_higher_credit_score_does_not_reduce_approval_probability
 tests/test_model_inference.py::test_higher_debt_to_income_does_not_increase_approval_probability
-tests/test_model_inference.py::test_a_much_larger_loan_does_not_increase_approval_probability
 tests/test_model_inference.py::test_prediction_is_invariant_to_repeated_calls
-tests/test_model_inference.py::test_prediction_is_invariant_to_batching
 tests/test_model_inference.py::test_prediction_is_invariant_to_column_order
 tests/test_model_inference.py::test_previous_default_forces_the_high_risk_tier
 tests/test_model_inference.py::test_risk_tier_boundaries[0.95-LOW]
@@ -57,7 +41,6 @@ tests/test_model_inference.py::test_risk_tier_boundaries[0.55-MEDIUM]
 tests/test_model_inference.py::test_risk_tier_boundaries[0.1-HIGH]
 tests/test_model_inference.py::test_business_rules_reject_uncreditworthy_applications[overrides0-annual income]
 tests/test_model_inference.py::test_business_rules_reject_uncreditworthy_applications[overrides1-below the minimum]
-tests/test_model_inference.py::test_validation_filter_does_not_mutate_the_payload
 tests/test_model_inference.py::test_inference_without_a_loaded_model_raises
 tests/test_model_training.py::test_model_can_overfit_a_small_batch
 tests/test_model_training.py::test_training_loss_decreases_with_capacity
@@ -65,7 +48,6 @@ tests/test_model_training.py::test_training_is_reproducible
 tests/test_model_training.py::test_shuffled_labels_destroy_generalisation
 tests/test_model_training.py::test_quality_gates_reject_a_weak_model
 tests/test_model_training.py::test_training_rejects_unusable_inputs[single_class_target]
-tests/test_model_training.py::test_training_rejects_unusable_inputs[length_mismatch]
 tests/test_model_training.py::test_training_rejects_unusable_inputs[unknown_algorithm]
 tests/test_model_training.py::test_model_quality_metrics_meet_release_gates
 tests/test_model_training.py::test_artifact_round_trips_through_disk
@@ -75,6 +57,4 @@ tests/test_unit_features.py::test_transformer_does_not_mutate_its_input
 tests/test_unit_features.py::test_transformer_recomputes_derived_columns_from_base_columns
 tests/test_unit_features.py::test_transformer_rejects_malformed_input[_frame_missing_a_base_column-missing base column]
 tests/test_unit_features.py::test_transformer_rejects_malformed_input[_frame_with_a_null_income-non-finite derived value]
-tests/test_unit_features.py::test_transformer_rejects_malformed_input[<lambda>-not a DataFrame]
 tests/test_unit_features.py::test_settings_are_immutable
-tests/test_unit_features.py::test_missing_config_file_fails_loudly

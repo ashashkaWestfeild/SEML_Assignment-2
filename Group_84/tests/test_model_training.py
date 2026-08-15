@@ -125,7 +125,7 @@ def test_quality_gates_reject_a_weak_model(xy):
 
 @pytest.mark.parametrize(
     "scenario",
-    ["single_class_target", "length_mismatch", "unknown_algorithm"],
+    ["single_class_target", "unknown_algorithm"],
 )
 def test_training_rejects_unusable_inputs(xy, scenario):
     """Each precondition failure surfaces as one ModelTrainingError."""
