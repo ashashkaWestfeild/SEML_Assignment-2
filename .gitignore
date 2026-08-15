@@ -21,3 +21,8 @@ artifacts/
 # OS
 Thumbs.db
 .DS_Store
+
+# Coverage data (SQLite build artifact; the readable report is committed
+# as reports/metrics/coverage_report.txt)
+.coverage
+htmlcov/
