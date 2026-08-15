@@ -4,12 +4,12 @@ rootdir: C:\Users\singh\AppData\Local\Temp\claude\C--Users-singh-OneDrive-Docume
 configfile: pyproject.toml
 plugins: anyio-4.12.0, langsmith-0.8.15, asyncio-1.4.0, cov-7.1.0
 asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
-collected 33 items
+collected 66 items
 
-tests\test_data_validation.py ...                                        [  9%]
-tests\test_integration_api.py .....                                      [ 24%]
-tests\test_model_inference.py .............                              [ 63%]
-tests\test_model_training.py .......                                     [ 84%]
+tests\test_data_validation.py ....................                       [ 30%]
+tests\test_integration_api.py .....................                      [ 62%]
+tests\test_model_inference.py .............                              [ 81%]
+tests\test_model_training.py .......                                     [ 92%]
 tests\test_unit_features.py .....                                        [100%]
 
 ============================== warnings summary ===============================
@@ -18,4 +18,4 @@ tests/test_integration_api.py::test_health_endpoint_reports_a_loaded_model
     from starlette.testclient import TestClient as TestClient  # noqa
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================== 33 passed, 1 warning in 5.40s ========================
+======================= 66 passed, 1 warning in 15.52s ========================
